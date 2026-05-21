@@ -65,7 +65,6 @@ nba-data/
 ```bash
 make init        # Initialize Bruin project + install deps
 make run         # Run full pipeline (uses default date range)
-make run-dates   # Run pipeline with custom dates: make run-dates START=2025-10-01 END=2025-10-31
 make query       # Open DuckDB REPL for ad-hoc queries
 make status      # Show pipeline asset status
 make clean-db    # Remove DuckDB file (start fresh)
