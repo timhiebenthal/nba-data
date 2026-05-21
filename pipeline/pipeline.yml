@@ -1,0 +1,14 @@
+name: nba-ingestion
+
+variables:
+  start_date:
+    type: string
+    default: "2025-10-21"
+  end_date:
+    type: string
+    default: "2025-10-27"
+
+default_connections:
+  duckdb: nba_duckdb
+
+retries: 1
