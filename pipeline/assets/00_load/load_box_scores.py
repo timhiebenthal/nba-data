@@ -19,6 +19,7 @@ import json
 import os
 import time
 import pandas as pd
+from tqdm import tqdm
 from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv3
 
 # Explicit schema: only these columns are kept in the output.
@@ -109,15 +110,12 @@ def materialize() -> pd.DataFrame:
     print(f"Found {len(game_ids)} games to fetch box scores for.")
 
     all_records = []
-    for i, game_id in enumerate(game_ids, 1):
-        print(f"Processing game {i}/{len(game_ids)}: {game_id}")
-
+    for game_id in tqdm(game_ids, desc="Fetching box scores"):
         try:
             boxscore = boxscoretraditionalv3.BoxScoreTraditionalV3(game_id=game_id)
             data = boxscore.get_dict().get("boxScoreTraditional")
 
             if data is None:
-                print(f"  No data for game {game_id}")
                 continue
 
             all_records.extend(_parse_boxscore(data))
@@ -126,7 +124,7 @@ def materialize() -> pd.DataFrame:
             time.sleep(2.5)
 
         except Exception as e:
-            print(f"  Error fetching game {game_id}: {e}")
+            tqdm.write(f"  Error fetching game {game_id}: {e}")
             continue
 
     if not all_records:
