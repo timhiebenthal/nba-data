@@ -51,119 +51,14 @@ nba-data/
 
 ## Data Model Layers (Clean → Prep → Core → Mart)
 
-Following the 4-layer transformation architecture. Each layer has a single responsibility and strict boundaries.
+4-layer transformation architecture. Full guidance available via the `layered-modeling` skill (auto-loads on keywords: clean, prep, core, mart, model, transform, SSOT, grain, daisy-chain).
 
-### Layer Overview
-
-| Layer | Purpose | Upstream | Downstream | Naming |
-|-------|---------|----------|------------|--------|
-| **clean** | Mirror raw API into structured tables | Raw API responses | prep | `clean_{source}_{entity}` |
-| **prep** | Flatten, join, deduplicate, normalize | clean | core | `prep_{description}` |
-| **core** | SSOT entities at atomic granularity | prep (or clean for simple cases) | mart | `core_{entity}` |
-| **mart** | Dashboard-ready, consumer-shaped datasets | core | BI / DAC | `mart_{use_case}` |
-
-### Layer 1: Clean
-
-**What it does:**
-- Call the source API (Python) or parse raw JSON/CSV into columns
-- Standardize types: cast timestamps, booleans, numeric types
-- Rename columns to snake_case
-- Handle nulls from the source (don't invent defaults)
-
-**What it does NOT do:**
-- No joins between sources
-- No business logic or derived columns
-- No deduplication (pass through duplicates as-is)
-- No filtering rows (except source-level pagination)
-
-**Anti-patterns:**
-- `CASE WHEN` logic for business rules → move to prep
-- `JOIN` to another clean table → move to prep
-- `WHERE` clauses that drop data → move to prep or core
-
-### Layer 2: Prep
-
-**What it does:**
-- Flatten nested/JSON arrays into rows (unnest, explode)
-- Join clean tables to resolve foreign keys (e.g. `team_id` → team name)
-- Deduplicate records (window functions, `ROW_NUMBER()`)
-- Parse and split compound columns
-- Create intermediate derived columns needed by core
-
-**What it does NOT do:**
-- No aggregations that define a metric (that's core or mart)
-- No final SSOT logic (that's core)
-- No dashboard-specific shaping (that's mart)
-
-**Anti-patterns:**
-- Aggregating to game-level stats → belongs in core
-- Pivoting for a specific chart → belongs in mart
-- Daisy-chaining: prep → prep → prep (keep to one prep step when possible)
-
-### Layer 3: Core
-
-**What it does:**
-- One table per business entity (teams, players, games, game_stats)
-- Atomic grain: one row = one thing at one point in time
-- Apply SSOT rules: deduplicate, resolve conflicts, pick latest
-- Define canonical metrics at their natural grain
-- Add business key columns and consistent naming
-
-**What it does NOT do:**
-- No joins between core tables (daisy-chaining forbidden)
-- No pre-aggregation for dashboards (that's mart)
-- No consumer-specific columns (that's mart)
-
-**Anti-patterns:**
-- `core_games` JOIN `core_players` → each is its own SSOT
-- `SUM()` across games for a season total → belongs in mart
-- Adding a "is_playoff_game" flag that only one dashboard needs → belongs in mart
-
-**Core table rules:**
-1. Each core table is independently queryable and meaningful
-2. Grain must be documented (e.g. "one row per player per game")
-3. Never reference another core table in a FROM or JOIN
-4. If you need data from two sources, join in prep, not core
-
-### Layer 4: Mart
-
-**What it does:**
-- Shape data for a specific consumer (dashboard, report, API)
-- Pre-aggregate metrics (season averages, rolling stats)
-- Denormalize for query performance
-- Add presentation-layer columns (formatted strings, rankings)
-
-**What it does NOT do:**
-- No new business logic (all logic lives in prep or core)
-- No raw data access (only reads from core)
-- No cross-mart dependencies
-
-**Anti-patterns:**
-- Mart reading from another mart → always read from core
-- Mart containing logic that should be a core metric → move to core
-- One mart trying to serve 5 different dashboards → split into separate marts
-
-### Decision Flow: Where does logic go?
-
-```
-Is it a raw API call or type cast?
-  → clean
-
-Is it flattening JSON, joining sources, or deduplicating?
-  → prep
-
-Is it defining the canonical version of an entity or metric?
-  → core
-
-Is it shaping data for a specific dashboard or report?
-  → mart
-```
-
-### Layer Rules Summary
-- **Clean**: No business logic, no joins. Named `clean_{source}_{entity}`
-- **Prep**: Complex transforms live here, not in Core. Named `prep_{description}`
-- **Core**: One table per entity. Never daisy-chain core tables. Named `core_{entity}`
-- **Mart**: Shape depends on consumer (DAC dashboards). Named `mart_{use_case}`
+| Layer | Purpose | Naming |
+|-------|---------|--------|
+| **clean** | Mirror raw API into structured tables; no joins | `clean_{source}_{entity}` |
+| **prep** | Flatten, join, deduplicate, normalize | `prep_{description}` |
+| **core** | SSOT entities at atomic granularity; no daisy-chaining | `core_{entity}` |
+| **mart** | Dashboard-ready, consumer-shaped datasets | `mart_{use_case}` |
 
 ## Common Commands
 

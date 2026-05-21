@@ -1,7 +1,7 @@
 .PHONY: init run run-dates query ui status clean-db
 
-START ?= "2025-10-21"
-END ?= "2025-10-27"
+START ?= "2026-04-01"
+END ?= "2026-05-20"
 
 export PATH := /home/tim_ubuntu/.local/bin:$(PATH)
 
