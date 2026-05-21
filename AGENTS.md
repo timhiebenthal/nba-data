@@ -25,11 +25,11 @@ nba-data/
 ├── pipeline/
 │   ├── pipeline.yml        # Pipeline definition + variables
 │   └── assets/
-│       ├── 00_load/        # Python: NBA API calls → raw tables in DuckDB
-│       │   ├── load_teams.py
-│       │   ├── load_players.py
-│       │   ├── load_games.py
-│       │   └── load_box_scores.py
+│       ├── 00_ingest/      # Python: NBA API calls → raw tables in DuckDB
+│       │   ├── raw_teams.py
+│       │   ├── raw_players.py
+│       │   ├── raw_games.py
+│       │   └── raw_box_scores.py
 │       ├── 01_clean/       # Layer 1: Standardize types, parse JSON, no joins
 │       │   ├── clean_teams.sql
 │       │   ├── clean_players.sql

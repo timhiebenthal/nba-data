@@ -9,7 +9,7 @@ init:
 	bruin validate
 
 run:
-	bruin run pipeline
+	bruin run pipeline --workers 1
 
 query:
 	duckdb nba.duckdb
