@@ -1,0 +1,10 @@
+[project]
+name = "nba-pipeline"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "nba_api>=1.4.0",
+    "pandas>=2.0.0",
+    "duckdb>=1.0.0",
+    "tqdm>=4.65.0",
+]
