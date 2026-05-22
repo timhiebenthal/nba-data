@@ -1,5 +1,5 @@
 """@bruin
-name: raw.box_scores
+name: raw.raw_box_scores
 connection: nba_duckdb
 
 materialization:

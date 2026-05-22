@@ -1,12 +1,12 @@
 /* @bruin
-name: core.game_stats
+name: core__game_stats
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - clean.box_scores
-  - clean.players
-  - clean.teams
+  - clean__box_scores
+  - clean__players
+  - clean__teams
 
 materialization:
   type: table
@@ -51,6 +51,6 @@ SELECT
     b.pf::integer AS pf,
     b.pts::integer AS pts,
     b.plus_minus::float AS plus_minus
-FROM clean.box_scores b
-LEFT JOIN clean.players p ON b.person_id = p.id
-LEFT JOIN clean.teams t ON b.team_id = t.id
+FROM clean__box_scores b
+LEFT JOIN clean__players p ON b.person_id = p.id
+LEFT JOIN clean__teams t ON b.team_id = t.id

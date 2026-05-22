@@ -5,3 +5,7 @@ __pycache__/
 .bruin.yml
 logs/*
 *:Zone.Identifier
+
+logs/runs
+logs/*.log
+*.py[cod]

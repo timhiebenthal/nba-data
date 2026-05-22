@@ -1,10 +1,10 @@
 /* @bruin
-name: core.players
+name: core__players
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - clean.players
+  - clean__players
 
 materialization:
   type: table
@@ -35,4 +35,4 @@ SELECT
     first_name::varchar AS first_name,
     last_name::varchar AS last_name,
     is_active::boolean AS is_active
-FROM clean.players
+FROM clean__players

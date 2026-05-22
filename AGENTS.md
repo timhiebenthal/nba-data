@@ -26,22 +26,22 @@ nba-data/
 │   ├── pipeline.yml        # Pipeline definition + variables
 │   └── assets/
 │       ├── 00_ingest/      # Python: NBA API calls → raw tables in DuckDB
-│       │   ├── raw_teams.py
-│       │   ├── raw_players.py
-│       │   ├── raw_games.py
-│       │   └── raw_box_scores.py
+│       │   ├── raw__teams.py
+│       │   ├── raw__players.py
+│       │   ├── raw__games.py
+│       │   └── raw__box_scores.py
 │       ├── 01_clean/       # Layer 1: Standardize types, parse JSON, no joins
-│       │   ├── clean_teams.sql
-│       │   ├── clean_players.sql
-│       │   ├── clean_games.sql
-│       │   └── clean_box_scores.sql
+│       │   ├── clean__teams.sql
+│       │   ├── clean__players.sql
+│       │   ├── clean__games.sql
+│       │   └── clean__box_scores.sql
 │       ├── 02_prep/        # Layer 2: Joins, flattening, business logic
-│       │   └── prep_game_details.sql
+│       │   └── prep__game_details.sql
 │       ├── 03_core/        # Layer 3: SSOT entities (atomic granularity)
-│       │   ├── core_teams.sql
-│       │   ├── core_players.sql
-│       │   ├── core_games.sql
-│       │   └── core_game_stats.sql
+│       │   ├── core__teams.sql
+│       │   ├── core__players.sql
+│       │   ├── core__games.sql
+│       │   └── core__game_stats.sql
 │       └── 04_mart/        # Layer 4: Dashboard-ready datasets
 │           └── (future DAC dashboards)
 ├── nba.duckdb              # Local DuckDB file (gitignored)
@@ -53,12 +53,13 @@ nba-data/
 
 4-layer transformation architecture. Full guidance available via the `layered-modeling` skill (auto-loads on keywords: clean, prep, core, mart, model, transform, SSOT, grain, daisy-chain).
 
-| Layer | Purpose | Naming |
-|-------|---------|--------|
-| **clean** | Mirror raw API into structured tables; no joins | `clean_{source}_{entity}` |
-| **prep** | Flatten, join, deduplicate, normalize | `prep_{description}` |
-| **core** | SSOT entities at atomic granularity; no daisy-chaining | `core_{entity}` |
-| **mart** | Dashboard-ready, consumer-shaped datasets | `mart_{use_case}` |
+| Layer | Purpose | Naming | Example |
+|-------|---------|--------|---------|
+| **raw** | Mirror API response as-is (Python ingestion) | `raw.raw_{entity}` | `raw.raw_teams`, `raw.raw_games` |
+| **clean** | Standardize types, parse JSON, no joins | `clean__{entity}` | `clean__teams`, `clean__box_scores` |
+| **prep** | Flatten, join, deduplicate, normalize | `prep__{description}` | `prep__game_details` |
+| **core** | SSOT entities at atomic granularity; no daisy-chaining | `core__{entity}` | `core__teams`, `core__game_stats` |
+| **mart** | Dashboard-ready, consumer-shaped datasets | `mart__{use_case}` | (future) |
 
 ## Common Commands
 
@@ -79,7 +80,13 @@ make clean-db    # Remove DuckDB file (start fresh)
 - Marimo notebook (`pull_data.py`) is legacy — do not modify or delete
 - `--var` values need quotes for strings: `--var 'start_date="2025-10-21"'`
 
-## Bruin Asset Types
+## Naming Convention
+
+File and DuckDB table names use `__` (double underscore) to separate the layer prefix from entity:
+- **File**: `raw__teams.py`, `clean__teams.sql`, `prep__game_details.sql`, `core__game_stats.sql`
+- **DuckDB**: `raw.teams`, `clean__teams`, `prep__game_details`, `core__game_stats`
+
+Exception: raw layer uses `raw.raw_{entity}` (schema+table prefix) in DuckDB because Bruin's `ingestr` engine requires `<schema>.<table>` format. Filenames still use `__`: `raw__teams.py`.
 
 - **Python assets**: Used for API ingestion (nba_api calls) — live in `load/`
 - **SQL assets**: Used for transformations/models — live in `clean/`, `prep/`, `core/`, `mart/`

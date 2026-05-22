@@ -1,5 +1,5 @@
 """@bruin
-name: raw.teams
+name: raw.raw_teams
 connection: nba_duckdb
 
 materialization:

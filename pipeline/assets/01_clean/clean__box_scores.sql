@@ -1,10 +1,10 @@
 /* @bruin
-name: clean.box_scores
+name: clean__box_scores
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - raw.box_scores
+  - raw.raw_box_scores
 
 materialization:
   type: table
@@ -20,4 +20,4 @@ columns:
 @bruin */
 
 SELECT *
-FROM "raw".box_scores
+FROM "raw".raw_box_scores

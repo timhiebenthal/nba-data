@@ -1,10 +1,10 @@
 /* @bruin
-name: clean.teams
+name: clean__players
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - raw.teams
+  - raw.raw_players
 
 materialization:
   type: table
@@ -12,4 +12,4 @@ materialization:
 @bruin */
 
 SELECT *
-FROM raw.teams
+FROM "raw".raw_players

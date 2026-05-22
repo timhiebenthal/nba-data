@@ -1,10 +1,10 @@
 /* @bruin
-name: clean.games
+name: clean__games
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - raw.games
+  - raw.raw_games
 
 materialization:
   type: table
@@ -30,4 +30,4 @@ SELECT
     PTS,
     SEASON_ID,
     SEASON
-FROM "raw".games
+FROM "raw".raw_games

@@ -1,10 +1,10 @@
 /* @bruin
-name: core.teams
+name: core__teams
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - clean.teams
+  - clean__teams
 
 materialization:
   type: table
@@ -43,4 +43,4 @@ SELECT
     city::varchar AS city,
     state::varchar AS state,
     year_founded::integer AS year_founded
-FROM clean.teams
+FROM clean__teams
