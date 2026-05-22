@@ -71,7 +71,11 @@ make run         # Run full pipeline (uses default date range)
 make query       # Open DuckDB REPL for ad-hoc queries
 make status      # Show pipeline asset status
 make clean-db    # Remove DuckDB file (start fresh)
+make format-sql    # Format pipeline SQL with sqlfmt
+make install-hooks # uv sync + pre-commit (sqlfmt on commit)
 ```
+
+SQL assets use [sqlfmt](https://sqlfmt.com) (`shandy-sqlfmt`). A **pre-commit** hook formats `pipeline/assets/**/*.sql` on commit. Run `make format-sql` before committing, or let the hook fix SQL when you commit. Optional: `yassun7010.shandy-sqlfmt` in VS Code for manual **Format Document** only.
 
 ## Key Conventions
 

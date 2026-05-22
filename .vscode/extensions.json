@@ -1,12 +1,3 @@
 {
-    "recommendations": [
-        "yassun7010.vscode-shandy-sqlfmt",
-        "bruin.bruin",
-        "ms-python.black-formatter",
-        "mikoz.black-py",
-        "njpwerner.autodocstring",
-        "mhutchie.git-graph",
-        "anysphere.cursorpyright",
-        "redhat.vscode-yaml"
-    ]
+  "recommendations": ["bruin.bruin", "yassun7010.shandy-sqlfmt"]
 }

@@ -1,0 +1,10 @@
+# See https://pre-commit.com
+default_language_version:
+  python: python3.11
+
+repos:
+  - repo: https://github.com/tconbeer/sqlfmt
+    rev: v0.30.0
+    hooks:
+      - id: sqlfmt
+        files: ^pipeline/assets/.*\.sql$

@@ -1,5 +1,21 @@
 {
+  "files.autoSave": "off",
   "files.associations": {
+    "**/pipeline/**/*.sql": "sql",
     "*.sql": "sql"
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "shandy-sqlfmt.path": "${workspaceFolder}/.venv/bin/sqlfmt",
+  "bruin.format.sqlfluff": false,
+  "sqlfluff.linter.run": "off",
+  "sqlfluff.format.enabled": false,
+  "editor.formatOnSave": true,
+  "[sql]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "yassun7010.shandy-sqlfmt"
+  },
+  "[jinja-sql]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "yassun7010.shandy-sqlfmt"
   }
 }
