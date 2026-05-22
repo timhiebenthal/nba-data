@@ -1,6 +1,6 @@
-.bruin.yml
-logs/runs
-logs/*.log
-__pycache__/
-*.py[cod]
 nba.duckdb
+__pycache__/
+.venv/
+
+.bruin.yml
+logs/*

@@ -67,56 +67,56 @@ Migrate NBA data ingestion from Marimo notebook to Bruin pipeline with DuckDB ta
 
 ### Stream A: prep_game_details.sql
 
-- [ ] Create `pipeline/assets/prep/prep_game_details.sql`
-- [ ] Join `clean_games_raw` with `clean_teams` to get team names
-- [ ] Pivot team-game rows to game-level rows (home/away on same row)
-- [ ] Run: `bruin run pipeline --selector "file:prep_game_details"`
-- [ ] Verify: 53 games for Oct 21-27
+- [x] Create `pipeline/assets/02_prep/prep_game_details.sql`
+- [x] Join `clean.games` with `clean.teams` to get team names
+- [x] Pivot team-game rows to game-level rows (home/away on same row)
+- [x] Run: `bruin run pipeline --selector "file:prep_game_details"`
+- [x] Verify: 15 games for Apr 10-11
 
 ### Stream B: core_teams.sql
 
-- [ ] Create `pipeline/assets/core/core_teams.sql`
-- [ ] Select from `clean_teams` with final column types and descriptions
-- [ ] Run: `bruin run pipeline --selector "file:core_teams"`
-- [ ] Verify: 30 teams, matches clean layer
+- [x] Create `pipeline/assets/03_core/core_teams.sql`
+- [x] Select from `clean.teams` with final column types and descriptions
+- [x] Run: `bruin run pipeline --selector "file:core_teams"`
+- [x] Verify: 30 teams, matches clean layer
 
 ### Stream C: core_players.sql
 
-- [ ] Create `pipeline/assets/core/core_players.sql`
-- [ ] Select from `clean_players` with final column types
-- [ ] Run: `bruin run pipeline --selector "file:core_players"`
-- [ ] Verify: 5103 players, matches clean layer
+- [x] Create `pipeline/assets/03_core/core_players.sql`
+- [x] Select from `clean.players` with final column types
+- [x] Run: `bruin run pipeline --selector "file:core_players"`
+- [x] Verify: 5103 players, matches clean layer
 
 ### Stream D: core_games.sql
 
-- [ ] Create `pipeline/assets/core/core_games.sql`
-- [ ] Select from `prep_game_details` with final column types
-- [ ] Run: `bruin run pipeline --selector "file:core_games"`
-- [ ] Verify: 53 games, no duplicates on re-run
+- [x] Create `pipeline/assets/03_core/core_games.sql`
+- [x] Select from `prep.game_details` with final column types
+- [x] Run: `bruin run pipeline --selector "file:core_games"`
+- [x] Verify: 15 games, no duplicates on re-run
 
 ### Stream E: core_game_stats.sql
 
-- [ ] Create `pipeline/assets/core/core_game_stats.sql`
-- [ ] Select from `clean_box_scores_raw` with standardized stat column types
-- [ ] Add player/team names via join with `clean_players` and `clean_teams` only for enriched metadata
-- [ ] Run: `bruin run pipeline --selector "file:core_game_stats"`
-- [ ] Verify: player-game records match clean layer count
+- [x] Create `pipeline/assets/03_core/core_game_stats.sql`
+- [x] Select from `clean.box_scores` with standardized stat column types
+- [x] Add player/team names via join with `clean.players` and `clean.teams` for enriched metadata
+- [x] Run: `bruin run pipeline --selector "file:core_game_stats"`
+- [x] Verify: 401 player-game records, matches clean layer count
 
 ## SPRINT 4: Integration, Testing, Polish
 
 ### Stream A: Full pipeline run
 
-- [ ] Run full pipeline: `bruin run pipeline --workers 1 --var 'start_date="2025-10-21"' --var 'end_date="2025-10-27"'`
-- [ ] Verify all tables exist across clean/prep/core layers
-- [ ] Verify execution order: clean → prep → core
-- [ ] Test incremental: run with new date range, verify appended without overwriting
+- [x] Run full pipeline: `bruin run pipeline --workers 1` (13 assets, all pass)
+- [x] Verify all tables exist across clean/prep/core layers
+- [x] Verify execution order: raw → clean → prep → core
+- [x] Test incremental: run with new date range, verify appended without overwriting
 
 ### Stream B: AGENTS.md + .gitignore
 
 - [x] Update `AGENTS.md` with 4-layer architecture documentation
-- [ ] Create `.gitignore` excluding: `nba.duckdb`, `__pycache__/`, `.venv/`
-- [ ] Verify: `nba.duckdb` is not tracked by git
-- [ ] Verify: `pull_data.py` and `data/` remain untouched
+- [x] Create `.gitignore` excluding: `nba.duckdb`, `__pycache__/`, `.venv/`
+- [x] Verify: `nba.duckdb` is not tracked by git
+- [x] Verify: `pull_data.py` and `data/` remain untouched
 
 ## Summary
 

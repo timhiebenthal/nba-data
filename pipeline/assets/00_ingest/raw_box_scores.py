@@ -106,13 +106,16 @@ def materialize() -> pd.DataFrame:
 
     # Fetch all games for the season, then filter client-side.
     # The API doesn't support date-range filtering on this endpoint.
-    gamefinder = leaguegamefinder.LeagueGameFinder(
-        season_nullable="2025-26",
-        season_type_nullable="Regular Season",
-        player_or_team_abbreviation="T",
-    )
+    frames = []
+    for season_type in ("Regular Season", "Playoffs"):
+        gamefinder = leaguegamefinder.LeagueGameFinder(
+            season_nullable="2025-26",
+            season_type_nullable=season_type,
+            player_or_team_abbreviation="T",
+        )
+        frames.append(gamefinder.get_data_frames()[0])
 
-    df = gamefinder.get_data_frames()[0]
+    df = pd.concat(frames, ignore_index=True).drop_duplicates(subset="GAME_ID")
     if df.empty:
         print("No games found from API.")
         return pd.DataFrame()
