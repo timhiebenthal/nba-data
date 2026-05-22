@@ -58,10 +58,10 @@ nba-data/
 | Layer | Purpose | Naming | Example |
 |-------|---------|--------|---------|
 | **raw** | Mirror API response as-is (Python → parquet) | `raw.raw_{entity}` | `raw.raw_teams`, `raw.raw_games` |
-| **clean** | Standardize types, parse JSON, no joins | `clean__{entity}` | `clean__teams`, `clean__box_scores` |
-| **prep** | Flatten, join, deduplicate, normalize | `prep__{description}` | `prep__game_details` |
-| **core** | SSOT entities at atomic granularity; no daisy-chaining | `core__{entity}` | `core__teams`, `core__game_stats` |
-| **mart** | Dashboard-ready, consumer-shaped datasets | `mart__{use_case}` | (future) |
+| **clean** | Standardize types, parse JSON, no joins | `clean.clean__{entity}` | `clean.clean__box_scores` |
+| **prep** | Flatten, join, deduplicate, normalize | `prep.prep__{description}` | `prep.prep__game_details` |
+| **core** | SSOT entities at atomic granularity; no daisy-chaining | `core.core__{entity}` | `core.core__game_stats` |
+| **mart** | Dashboard-ready, consumer-shaped datasets | `mart.mart__{use_case}` | (future) |
 
 ## Common Commands
 
@@ -90,11 +90,11 @@ DuckDB table names use dots: one schema per layer.
 | Layer | Schema | File Pattern | DuckDB Table |
 |-------|--------|-------------|--------------|
 | raw | `raw` | `raw__{entity}.py` | `raw.raw_{entity}` (parquet files, no DuckDB table) |
-| clean | `clean` | `clean__{entity}.sql` | `clean__{entity}` |
-| prep | `prep` | `prep__{description}.sql` | `prep__{description}` |
-| core | `core` | `core__{entity}.sql` | `core__{entity}` |
-| mart | `mart` | `mart__{use_case}.sql` | `mart__{use_case}` |
+| clean | `clean` | `clean__{entity}.sql` | `clean.clean__{entity}` |
+| prep | `prep` | `prep__{description}.sql` | `prep.prep__{description}` |
+| core | `core` | `core__{entity}.sql` | `core.core__{entity}` |
+| mart | `mart` | `mart__{use_case}.sql` | `mart.mart__{use_case}` |
 
 Raw Python assets write to `data/raw/raw__{entity}.parquet`. Clean SQL assets read from those
-parquet files and materialize into DuckDB tables named `clean__{entity}`. Downstream layers
-reference by name (e.g., `FROM clean__box_scores`).
+parquet files and materialize into DuckDB tables within the `clean` schema. Downstream layers
+reference by schema-qualified name (e.g., `FROM clean.clean__box_scores`).
