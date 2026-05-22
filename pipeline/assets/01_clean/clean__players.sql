@@ -10,6 +10,10 @@ materialization:
   type: table
   strategy: create+replace
 @bruin */
-
-SELECT *
-FROM read_parquet('data/raw/raw__players.parquet')
+select
+    id as player_id,
+    full_name as player_name,
+    first_name as player_first_name,
+    last_name as player_last_name,
+    is_active as is_active_player
+from read_parquet('data/raw/raw__players/*.parquet')

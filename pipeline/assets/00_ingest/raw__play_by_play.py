@@ -8,12 +8,13 @@ import os
 import time
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 
 import pandas as pd
 from tqdm import tqdm
 from nba_api.stats.endpoints import leaguegamefinder, playbyplayv3
 
-RAW_DIR = "data/raw"
+RAW_DIR = "data/raw/raw__play_by_play"
 EXPECTED_COLUMNS = [
     "GAME_ID", "ACTION_NUMBER", "CLOCK", "PERIOD",
     "TEAM_ID", "TEAM_TRICODE", "PERSON_ID", "PLAYER_NAME", "PLAYER_NAME_I",
@@ -25,6 +26,20 @@ EXPECTED_COLUMNS = [
 
 MAX_WORKERS = 3
 REQUEST_DELAY = 2.5
+
+
+def _month_keys(start_date: str, end_date: str) -> list[str]:
+    start = datetime.strptime(start_date, "%Y-%m-%d").date()
+    end = datetime.strptime(end_date, "%Y-%m-%d").date()
+    keys: list[str] = []
+    y, m = start.year, start.month
+    while (y, m) <= (end.year, end.month):
+        keys.append(f"{y}-{m:02d}")
+        m += 1
+        if m > 12:
+            m = 1
+            y += 1
+    return keys
 
 
 def _parse_actions(game_id: str, actions: list[dict]) -> list[dict]:
@@ -99,9 +114,10 @@ df = pd.concat(frames, ignore_index=True).drop_duplicates(subset="GAME_ID")
 if df.empty:
     print("No games found from API.")
     os.makedirs(RAW_DIR, exist_ok=True)
-    pd.DataFrame(columns=EXPECTED_COLUMNS).to_parquet(f"{RAW_DIR}/raw__play_by_play.parquet", index=False)
 else:
     df["GAME_DATE"] = pd.to_datetime(df["GAME_DATE"]).dt.strftime("%Y-%m-%d")
+    game_date_map = dict(zip(df["GAME_ID"], df["GAME_DATE"]))
+
     game_ids = df.query(
         f"GAME_DATE >= '{start_date}' and GAME_DATE <= '{end_date}'"
     )["GAME_ID"].unique().tolist()
@@ -109,7 +125,6 @@ else:
     if not game_ids:
         print(f"No games found in date range {start_date} to {end_date}.")
         os.makedirs(RAW_DIR, exist_ok=True)
-        pd.DataFrame(columns=EXPECTED_COLUMNS).to_parquet(f"{RAW_DIR}/raw__play_by_play.parquet", index=False)
     else:
         print(f"Found {len(game_ids)} games to fetch play-by-play for (concurrency={MAX_WORKERS}).")
 
@@ -126,7 +141,6 @@ else:
         if not all_records:
             print("No play-by-play data collected.")
             os.makedirs(RAW_DIR, exist_ok=True)
-            pd.DataFrame(columns=EXPECTED_COLUMNS).to_parquet(f"{RAW_DIR}/raw__play_by_play.parquet", index=False)
         else:
             result = pd.DataFrame(all_records)
             available = [c for c in EXPECTED_COLUMNS if c in result.columns]
@@ -141,6 +155,14 @@ else:
                 if col in result.columns:
                     result[col] = pd.to_numeric(result[col], errors="coerce")
 
+            result["GAME_DATE"] = result["GAME_ID"].map(game_date_map)
+
             os.makedirs(RAW_DIR, exist_ok=True)
-            result.to_parquet(f"{RAW_DIR}/raw__play_by_play.parquet", index=False)
-            print(f"Saved {len(result)} play-by-play records")
+            for month_key in _month_keys(start_date, end_date):
+                month_data = result[result["GAME_DATE"].str.startswith(month_key)]
+                if month_data.empty:
+                    continue
+                month_data.drop(columns=["GAME_DATE"]).to_parquet(
+                    f"{RAW_DIR}/{month_key}.parquet", index=False
+                )
+                print(f"  Wrote {RAW_DIR}/{month_key}.parquet ({len(month_data)} rows)")

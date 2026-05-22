@@ -10,6 +10,4 @@ materialization:
   type: table
   strategy: create+replace
 @bruin */
-
-SELECT *
-FROM read_parquet('data/raw/raw__teams.parquet')
+select * from read_parquet('data/raw/raw__teams/*.parquet')

@@ -18,16 +18,16 @@ columns:
     type: integer
     primary_key: true
 @bruin */
-
-SELECT
-    GAME_ID,
-    GAME_DATE,
-    TEAM_ID,
-    TEAM_NAME,
-    TEAM_ABBREVIATION,
-    MATCHUP,
-    WL,
-    PTS,
-    SEASON_ID,
-    SEASON
-FROM read_parquet('data/raw/raw__games.parquet')
+select
+    game_id,
+    cast(game_date as date) as game_date,
+    team_id,
+    team_name,
+    team_abbreviation,
+    matchup,
+    wl,
+    pts,
+    season_id,
+    season
+from read_parquet('data/raw/raw__games/*.parquet')
+where game_id = '0022500090'

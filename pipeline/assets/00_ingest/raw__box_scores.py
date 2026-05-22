@@ -3,14 +3,17 @@ name: raw.raw_box_scores
 connection: nba_duckdb
 @bruin"""
 
+import calendar
 import json
 import os
 import time
+from datetime import datetime
+
 import pandas as pd
 from tqdm import tqdm
 from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv3
 
-RAW_DIR = "data/raw"
+RAW_DIR = "data/raw/raw__box_scores"
 EXPECTED_COLUMNS = [
     "GAME_ID", "TEAM_ID", "PERSON_ID", "PLAYER_NAME",
     "START_POSITION", "COMMENT", "MIN", "FGM", "FGA", "FG_PCT",
@@ -18,6 +21,20 @@ EXPECTED_COLUMNS = [
     "OREB", "DREB", "REB", "AST", "STL", "BLK", "TOV", "PF", "PTS",
     "PLUS_MINUS",
 ]
+
+
+def _month_keys(start_date: str, end_date: str) -> list[str]:
+    start = datetime.strptime(start_date, "%Y-%m-%d").date()
+    end = datetime.strptime(end_date, "%Y-%m-%d").date()
+    keys: list[str] = []
+    y, m = start.year, start.month
+    while (y, m) <= (end.year, end.month):
+        keys.append(f"{y}-{m:02d}")
+        m += 1
+        if m > 12:
+            m = 1
+            y += 1
+    return keys
 
 
 def _parse_boxscore(data: dict) -> list[dict]:
@@ -82,9 +99,10 @@ df = pd.concat(frames, ignore_index=True).drop_duplicates(subset="GAME_ID")
 if df.empty:
     print("No games found from API.")
     os.makedirs(RAW_DIR, exist_ok=True)
-    pd.DataFrame(columns=EXPECTED_COLUMNS).to_parquet(f"{RAW_DIR}/raw__box_scores.parquet", index=False)
 else:
     df["GAME_DATE"] = pd.to_datetime(df["GAME_DATE"]).dt.strftime("%Y-%m-%d")
+    game_date_map = dict(zip(df["GAME_ID"], df["GAME_DATE"]))
+
     game_ids = df.query(
         f"GAME_DATE >= '{start_date}' and GAME_DATE <= '{end_date}'"
     )["GAME_ID"].unique().tolist()
@@ -92,7 +110,6 @@ else:
     if not game_ids:
         print(f"No games found in date range {start_date} to {end_date}.")
         os.makedirs(RAW_DIR, exist_ok=True)
-        pd.DataFrame(columns=EXPECTED_COLUMNS).to_parquet(f"{RAW_DIR}/raw__box_scores.parquet", index=False)
     else:
         print(f"Found {len(game_ids)} games to fetch box scores for.")
 
@@ -112,7 +129,6 @@ else:
         if not all_records:
             print("No box score data collected.")
             os.makedirs(RAW_DIR, exist_ok=True)
-            pd.DataFrame(columns=EXPECTED_COLUMNS).to_parquet(f"{RAW_DIR}/raw__box_scores.parquet", index=False)
         else:
             result = pd.DataFrame(all_records)
             available = [c for c in EXPECTED_COLUMNS if c in result.columns]
@@ -121,6 +137,14 @@ else:
             for col in numeric_cols:
                 result[col] = pd.to_numeric(result[col], errors="coerce")
 
+            result["GAME_DATE"] = result["GAME_ID"].map(game_date_map)
+
             os.makedirs(RAW_DIR, exist_ok=True)
-            result.to_parquet(f"{RAW_DIR}/raw__box_scores.parquet", index=False)
-            print(f"Saved {len(result)} player-game records")
+            for month_key in _month_keys(start_date, end_date):
+                month_data = result[result["GAME_DATE"].str.startswith(month_key)]
+                if month_data.empty:
+                    continue
+                month_data.drop(columns=["GAME_DATE"]).to_parquet(
+                    f"{RAW_DIR}/{month_key}.parquet", index=False
+                )
+                print(f"  Wrote {RAW_DIR}/{month_key}.parquet ({len(month_data)} rows)")
