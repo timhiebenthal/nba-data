@@ -42,7 +42,7 @@ def materialize() -> pd.DataFrame:
         )
         frames.append(gamefinder.get_data_frames()[0])
 
-    df = pd.concat(frames, ignore_index=True).drop_duplicates(subset="GAME_ID")
+    df = pd.concat(frames, ignore_index=True).drop_duplicates()
 
     if df.empty:
         print("No games found from API.")
@@ -61,6 +61,8 @@ def materialize() -> pd.DataFrame:
         "GAME_ID", "GAME_DATE", "TEAM_ID", "TEAM_NAME",
         "TEAM_ABBREVIATION", "MATCHUP", "WL", "PTS", "SEASON_ID"
     ]].copy()
+
+    result = result.reset_index(drop=True)
 
     result["SEASON"] = result["SEASON_ID"].str[:4] + "-" + result["SEASON_ID"].str[4:]
 
