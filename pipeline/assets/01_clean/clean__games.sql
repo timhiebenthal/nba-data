@@ -1,5 +1,5 @@
 /* @bruin
-name: clean__games
+name: clean.clean__games
 connection: nba_duckdb
 type: duckdb.sql
 
@@ -30,4 +30,4 @@ SELECT
     PTS,
     SEASON_ID,
     SEASON
-FROM "raw".raw_games
+FROM read_parquet('data/raw/raw__games.parquet')

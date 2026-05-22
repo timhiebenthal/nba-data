@@ -3,7 +3,7 @@ name: nba-ingestion
 variables:
   start_date:
     type: string
-    default: "2026-05-18"
+    default: "2026-04-15"
   end_date:
     type: string
     default: "2026-05-21"

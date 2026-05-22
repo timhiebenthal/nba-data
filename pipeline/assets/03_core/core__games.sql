@@ -1,10 +1,10 @@
 /* @bruin
-name: core__games
+name: core.core__games
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - prep__game_details
+  - prep.prep__game_details
 
 materialization:
   type: table
@@ -32,4 +32,4 @@ SELECT
     away_team_abbrev::varchar AS away_team_abbrev,
     away_team_pts::integer AS away_team_pts,
     away_team_wl::varchar AS away_team_wl
-FROM prep__game_details
+FROM prep.prep__game_details

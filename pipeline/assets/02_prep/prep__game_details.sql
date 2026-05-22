@@ -1,11 +1,11 @@
 /* @bruin
-name: prep__game_details
+name: prep.prep__game_details
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - clean__games
-  - clean__teams
+  - clean.clean__games
+  - clean.clean__teams
 
 materialization:
   type: table
@@ -24,8 +24,8 @@ WITH games_with_teams AS (
         g.pts,
         g.season_id,
         g.season
-    FROM clean__games g
-    LEFT JOIN clean__teams t ON g.team_id = t.id
+    FROM clean.clean__games g
+    LEFT JOIN clean.clean__teams t ON g.team_id = t.id
 ),
 home_games AS (
     SELECT 

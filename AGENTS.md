@@ -25,16 +25,18 @@ nba-data/
 ├── pipeline/
 │   ├── pipeline.yml        # Pipeline definition + variables
 │   └── assets/
-│       ├── 00_ingest/      # Python: NBA API calls → raw tables in DuckDB
+│       ├── 00_ingest/      # Python: NBA API calls → raw parquet files
 │       │   ├── raw__teams.py
 │       │   ├── raw__players.py
 │       │   ├── raw__games.py
-│       │   └── raw__box_scores.py
+│       │   ├── raw__box_scores.py
+│       │   └── raw__play_by_play.py
 │       ├── 01_clean/       # Layer 1: Standardize types, parse JSON, no joins
 │       │   ├── clean__teams.sql
 │       │   ├── clean__players.sql
 │       │   ├── clean__games.sql
-│       │   └── clean__box_scores.sql
+│       │   ├── clean__box_scores.sql
+│       │   └── clean__play_by_play.sql
 │       ├── 02_prep/        # Layer 2: Joins, flattening, business logic
 │       │   └── prep__game_details.sql
 │       ├── 03_core/        # Layer 3: SSOT entities (atomic granularity)
@@ -55,7 +57,7 @@ nba-data/
 
 | Layer | Purpose | Naming | Example |
 |-------|---------|--------|---------|
-| **raw** | Mirror API response as-is (Python ingestion) | `raw.raw_{entity}` | `raw.raw_teams`, `raw.raw_games` |
+| **raw** | Mirror API response as-is (Python → parquet) | `raw.raw_{entity}` | `raw.raw_teams`, `raw.raw_games` |
 | **clean** | Standardize types, parse JSON, no joins | `clean__{entity}` | `clean__teams`, `clean__box_scores` |
 | **prep** | Flatten, join, deduplicate, normalize | `prep__{description}` | `prep__game_details` |
 | **core** | SSOT entities at atomic granularity; no daisy-chaining | `core__{entity}` | `core__teams`, `core__game_stats` |
@@ -82,12 +84,17 @@ make clean-db    # Remove DuckDB file (start fresh)
 
 ## Naming Convention
 
-File and DuckDB table names use `__` (double underscore) to separate the layer prefix from entity:
-- **File**: `raw__teams.py`, `clean__teams.sql`, `prep__game_details.sql`, `core__game_stats.sql`
-- **DuckDB**: `raw.teams`, `clean__teams`, `prep__game_details`, `core__game_stats`
+File names use `__` (double underscore) to separate the layer prefix from entity — same as before.
+DuckDB table names use dots: one schema per layer.
 
-Exception: raw layer uses `raw.raw_{entity}` (schema+table prefix) in DuckDB because Bruin's `ingestr` engine requires `<schema>.<table>` format. Filenames still use `__`: `raw__teams.py`.
+| Layer | Schema | File Pattern | DuckDB Table |
+|-------|--------|-------------|--------------|
+| raw | `raw` | `raw__{entity}.py` | `raw.raw_{entity}` (parquet files, no DuckDB table) |
+| clean | `clean` | `clean__{entity}.sql` | `clean__{entity}` |
+| prep | `prep` | `prep__{description}.sql` | `prep__{description}` |
+| core | `core` | `core__{entity}.sql` | `core__{entity}` |
+| mart | `mart` | `mart__{use_case}.sql` | `mart__{use_case}` |
 
-- **Python assets**: Used for API ingestion (nba_api calls) — live in `load/`
-- **SQL assets**: Used for transformations/models — live in `clean/`, `prep/`, `core/`, `mart/`
-- All assets live under `pipeline/assets/`
+Raw Python assets write to `data/raw/raw__{entity}.parquet`. Clean SQL assets read from those
+parquet files and materialize into DuckDB tables named `clean__{entity}`. Downstream layers
+reference by name (e.g., `FROM clean__box_scores`).

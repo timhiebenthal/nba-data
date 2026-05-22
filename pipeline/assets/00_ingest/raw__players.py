@@ -1,15 +1,15 @@
 """@bruin
 name: raw.raw_players
 connection: nba_duckdb
-
-materialization:
-  type: table
-  strategy: create+replace
 @bruin"""
 
+import os
 import pandas as pd
 from nba_api.stats.static import players
 
+RAW_DIR = "data/raw"
 
-def materialize() -> pd.DataFrame:
-    return pd.DataFrame(players.get_players())
+os.makedirs(RAW_DIR, exist_ok=True)
+df = pd.DataFrame(players.get_players())
+df.to_parquet(f"{RAW_DIR}/raw__players.parquet", index=False)
+print(f"Saved {len(df)} players")

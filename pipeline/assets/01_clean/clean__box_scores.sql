@@ -1,5 +1,5 @@
 /* @bruin
-name: clean__box_scores
+name: clean.clean__box_scores
 connection: nba_duckdb
 type: duckdb.sql
 
@@ -20,4 +20,4 @@ columns:
 @bruin */
 
 SELECT *
-FROM "raw".raw_box_scores
+FROM read_parquet('data/raw/raw__box_scores.parquet')

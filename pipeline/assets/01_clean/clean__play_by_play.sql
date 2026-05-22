@@ -1,5 +1,5 @@
 /* @bruin
-name: clean__play_by_play
+name: clean.clean__play_by_play
 connection: nba_duckdb
 type: duckdb.sql
 
@@ -20,4 +20,4 @@ columns:
 @bruin */
 
 SELECT *
-FROM raw.raw_play_by_play
+FROM read_parquet('data/raw/raw__play_by_play.parquet')

@@ -1,12 +1,12 @@
 /* @bruin
-name: core__game_stats
+name: core.core__game_stats
 connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - clean__box_scores
-  - clean__players
-  - clean__teams
+  - clean.clean__box_scores
+  - clean.clean__players
+  - clean.clean__teams
 
 materialization:
   type: table
@@ -22,35 +22,35 @@ columns:
 @bruin */
 
 SELECT
-    b.game_id::varchar AS game_id,
-    b.team_id::integer AS team_id,
-    t.full_name::varchar AS team_name,
-    t.abbreviation::varchar AS team_abbreviation,
-    b.person_id::integer AS person_id,
-    b.player_name::varchar AS player_name,
-    p.full_name::varchar AS player_full_name,
-    b.start_position::varchar AS start_position,
-    b.comment::varchar AS comment,
-    b.min::varchar AS min,
-    b.fgm::integer AS fgm,
-    b.fga::integer AS fga,
-    b.fg_pct::float AS fg_pct,
-    b.fg3_m::integer AS fg3_m,
-    b.fg3_a::integer AS fg3_a,
-    b.fg3_pct::float AS fg3_pct,
-    b.ftm::integer AS ftm,
-    b.fta::integer AS fta,
-    b.ft_pct::float AS ft_pct,
-    b.oreb::integer AS oreb,
-    b.dreb::integer AS dreb,
-    b.reb::integer AS reb,
-    b.ast::integer AS ast,
-    b.stl::integer AS stl,
-    b.blk::integer AS blk,
-    b.tov::integer AS tov,
-    b.pf::integer AS pf,
-    b.pts::integer AS pts,
-    b.plus_minus::float AS plus_minus
-FROM clean__box_scores b
-LEFT JOIN clean__players p ON b.person_id = p.id
-LEFT JOIN clean__teams t ON b.team_id = t.id
+    b.GAME_ID::varchar AS GAME_ID,
+    b.TEAM_ID::integer AS TEAM_ID,
+    t.full_name::varchar AS TEAM_NAME,
+    t.abbreviation::varchar AS TEAM_ABBREVIATION,
+    b.PERSON_ID::integer AS PERSON_ID,
+    b.PLAYER_NAME::varchar AS PLAYER_NAME,
+    p.full_name::varchar AS PLAYER_FULL_NAME,
+    b.START_POSITION::varchar AS START_POSITION,
+    b.COMMENT::varchar AS COMMENT,
+    b.MIN::varchar AS MIN,
+    b.FGM::integer AS FGM,
+    b.FGA::integer AS FGA,
+    b.FG_PCT::float AS FG_PCT,
+    b.FG3M::integer AS FG3M,
+    b.FG3A::integer AS FG3A,
+    b.FG3_PCT::float AS FG3_PCT,
+    b.FTM::integer AS FTM,
+    b.FTA::integer AS FTA,
+    b.FT_PCT::float AS FT_PCT,
+    b.OREB::integer AS OREB,
+    b.DREB::integer AS DREB,
+    b.REB::integer AS REB,
+    b.AST::integer AS AST,
+    b.STL::integer AS STL,
+    b.BLK::integer AS BLK,
+    b.TOV::integer AS TOV,
+    b.PF::integer AS PF,
+    b.PTS::integer AS PTS,
+    b.PLUS_MINUS::float AS PLUS_MINUS
+FROM clean.clean__box_scores b
+LEFT JOIN clean.clean__players p ON b.person_id = p.id
+LEFT JOIN clean.clean__teams t ON b.team_id = t.id

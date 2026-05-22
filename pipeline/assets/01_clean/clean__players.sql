@@ -1,5 +1,5 @@
 /* @bruin
-name: clean__players
+name: clean.clean__players
 connection: nba_duckdb
 type: duckdb.sql
 
@@ -12,4 +12,4 @@ materialization:
 @bruin */
 
 SELECT *
-FROM "raw".raw_players
+FROM read_parquet('data/raw/raw__players.parquet')
