@@ -1,5 +1,5 @@
 """@bruin
-name: load.games
+name: raw.games
 connection: nba_duckdb
 
 materialization:
@@ -56,7 +56,7 @@ def materialize() -> pd.DataFrame:
     # Keep only relevant columns, no joins or pivoting
     result = games[[
         "GAME_ID", "GAME_DATE", "TEAM_ID", "TEAM_NAME",
-        "TEAM_ABBREVIATION", "WL", "PTS", "SEASON_ID"
+        "TEAM_ABBREVIATION", "MATCHUP", "WL", "PTS", "SEASON_ID"
     ]].copy()
 
     result["SEASON"] = result["SEASON_ID"].str[:4] + "-" + result["SEASON_ID"].str[4:]

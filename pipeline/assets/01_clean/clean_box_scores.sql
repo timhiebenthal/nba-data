@@ -4,11 +4,11 @@ connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - load.box_scores
+  - raw.box_scores
 
 materialization:
   type: table
-  strategy: merge
+  strategy: create+replace
 
 columns:
   - name: GAME_ID
@@ -20,4 +20,4 @@ columns:
 @bruin */
 
 SELECT *
-FROM load.box_scores
+FROM "raw".box_scores

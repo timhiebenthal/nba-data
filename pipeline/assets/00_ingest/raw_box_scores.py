@@ -1,5 +1,5 @@
 """@bruin
-name: load.box_scores
+name: raw.box_scores
 connection: nba_duckdb
 
 materialization:
@@ -45,9 +45,8 @@ def _parse_boxscore(data: dict) -> list[dict]:
           │           └── statistics{}  ← all the actual stats
           └── awayTeam (same structure)
 
-    This function walks both teams, merges player metadata into the stats dict,
-    and attaches game-level identifiers (GAME_ID, TEAM_ID) so each record is
-    independently queryable.
+    This function walks both teams, maps player metadata and statistics into the
+    expected schema layout, and attaches game-level identifiers (GAME_ID, TEAM_ID).
     """
     records = []
     game_id = data.get("gameId")
@@ -58,15 +57,35 @@ def _parse_boxscore(data: dict) -> list[dict]:
 
         for player in team.get("players", []):
             stats = player.get("statistics", {})
-            stats.update({
+            mapped_stats = {
                 "GAME_ID": game_id,
                 "TEAM_ID": team_id,
                 "PERSON_ID": player.get("personId"),
-                "PLAYER_NAME": player.get("name"),
-                "START_POSITION": player.get("startPosition"),
+                "PLAYER_NAME": f"{player.get('firstName', '')} {player.get('familyName', '')}".strip(),
+                "START_POSITION": player.get("position"),
                 "COMMENT": player.get("comment"),
-            })
-            records.append(stats)
+                "MIN": stats.get("minutes"),
+                "FGM": stats.get("fieldGoalsMade"),
+                "FGA": stats.get("fieldGoalsAttempted"),
+                "FG_PCT": stats.get("fieldGoalsPercentage"),
+                "FG3M": stats.get("threePointersMade"),
+                "FG3A": stats.get("threePointersAttempted"),
+                "FG3_PCT": stats.get("threePointersPercentage"),
+                "FTM": stats.get("freeThrowsMade"),
+                "FTA": stats.get("freeThrowsAttempted"),
+                "FT_PCT": stats.get("freeThrowsPercentage"),
+                "OREB": stats.get("reboundsOffensive"),
+                "DREB": stats.get("reboundsDefensive"),
+                "REB": stats.get("reboundsTotal"),
+                "AST": stats.get("assists"),
+                "STL": stats.get("steals"),
+                "BLK": stats.get("blocks"),
+                "TOV": stats.get("turnovers"),
+                "PF": stats.get("foulsPersonal"),
+                "PTS": stats.get("points"),
+                "PLUS_MINUS": stats.get("plusMinusPoints"),
+            }
+            records.append(mapped_stats)
 
     return records
 

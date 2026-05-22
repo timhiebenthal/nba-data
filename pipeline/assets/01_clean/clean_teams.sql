@@ -4,7 +4,7 @@ connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - load.teams
+  - raw.teams
 
 materialization:
   type: table
@@ -12,4 +12,4 @@ materialization:
 @bruin */
 
 SELECT *
-FROM load.teams
+FROM raw.teams

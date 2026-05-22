@@ -4,11 +4,11 @@ connection: nba_duckdb
 type: duckdb.sql
 
 depends:
-  - load.games
+  - raw.games
 
 materialization:
   type: table
-  strategy: merge
+  strategy: create+replace
 
 columns:
   - name: GAME_ID
@@ -25,8 +25,9 @@ SELECT
     TEAM_ID,
     TEAM_NAME,
     TEAM_ABBREVIATION,
+    MATCHUP,
     WL,
     PTS,
     SEASON_ID,
     SEASON
-FROM load.games
+FROM "raw".games
