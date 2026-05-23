@@ -38,3 +38,6 @@ clean-raw:
 
 format-sql:
 	uv run sqlfmt pipeline/assets
+
+marimo:
+	uv run marimo edit notebook.py
