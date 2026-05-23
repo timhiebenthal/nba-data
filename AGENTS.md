@@ -68,12 +68,33 @@ nba-data/
 ```bash
 make init        # Initialize Bruin project + install deps
 make run         # Run full pipeline (uses default date range)
+make load        # Run only raw Python assets (fetch NBA API → parquet)
+make transform   # Run only SQL assets (parquet → DuckDB tables)
 make query       # Open DuckDB REPL for ad-hoc queries
 make status      # Show pipeline asset status
 make clean-db    # Remove DuckDB file (start fresh)
-make format-sql    # Format pipeline SQL with sqlfmt
+make clean-raw   # Remove all parquet files in data/raw/
+make format-sql  # Format pipeline SQL with sqlfmt
 make install-hooks # uv sync + pre-commit (sqlfmt on commit)
 ```
+
+## Testing Changes
+
+Always verify before telling the user things work. No `--dry-run` flag exists in Bruin.
+
+```bash
+# 1. Validate syntax (instant)
+bruin validate
+
+# 2. Check selector matches the right assets (instant)
+bruin run pipeline --selector "path:assets/01_clean+"
+# → Look for "Running selected assets: ..." in output
+
+# 3. Quick end-to-end with small date range (2-3 min)
+bruin run pipeline --var 'start_date="2025-10-21"' --var 'end_date="2025-10-22"'
+```
+
+**Rule of thumb:** Always run `bruin validate` and check selector output before committing to a full run. Use a 1–2 day date range for end-to-end tests, not the full season.
 
 SQL assets use [sqlfmt](https://sqlfmt.com) (`shandy-sqlfmt`). A **pre-commit** hook formats `pipeline/assets/**/*.sql` on commit. Run `make format-sql` before committing, or let the hook fix SQL when you commit. Optional: `yassun7010.shandy-sqlfmt` in VS Code for manual **Format Document** only.
 
@@ -99,6 +120,6 @@ DuckDB table names use dots: one schema per layer.
 | core | `core` | `core__{entity}.sql` | `core.core__{entity}` |
 | mart | `mart` | `mart__{use_case}.sql` | `mart.mart__{use_case}` |
 
-Raw Python assets write to `data/raw/raw__{entity}.parquet`. Clean SQL assets read from those
-parquet files and materialize into DuckDB tables within the `clean` schema. Downstream layers
-reference by schema-qualified name (e.g., `FROM clean.clean__box_scores`).
+Raw Python assets write month-partitioned parquet files to `data/raw/raw__{entity}/YYYY-MM.parquet`.
+Clean SQL assets read via `read_parquet('data/raw/raw__{entity}/*.parquet')` glob. This supports
+incremental accumulation — each run writes only its months, preserving previous data.

@@ -13,7 +13,13 @@ install-hooks:
 	uv run pre-commit install
 
 run:
-	bruin run pipeline --workers 1
+	bruin run pipeline
+
+load:
+	bruin run pipeline --selector "fqn:*raw*"
+
+transform:
+	bruin run pipeline --selector "path:assets/01_clean+"
 
 query:
 	duckdb nba.duckdb
@@ -26,6 +32,9 @@ status:
 
 clean-db:
 	rm -f nba.duckdb
+
+clean-raw:
+	rm -rf data/raw/*/
 
 format-sql:
 	uv run sqlfmt pipeline/assets
