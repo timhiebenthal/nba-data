@@ -17,40 +17,29 @@ columns:
     description: "Unique identifier for the NBA game"
     primary_key: true
     checks:
+      - name: unique
       - name: not_null
   - name: game_date
     type: date
     description: "Date the game was played"
-  - name: team_id
+  - name: home_team_id
     type: integer
-    description: "Unique identifier for the team"
-    primary_key: true
-    checks:
-      - name: not_null
-  - name: team_name
-    type: varchar
-    description: "Full name of the team"
-  - name: team_abbreviation
-    type: varchar
-    description: "3-letter abbreviation for the team"
+    description: "Team ID of the home team"
+  - name: away_team_id
+    type: integer
+    description: "Team ID of the away team"
   - name: matchup
     type: varchar
-    description: "Matchup string (e.g. 'LAL vs. GSW' or 'LAL @ GSW')"
-  - name: is_home_team
-    type: boolean
-    description: "Whether this row represents the home team"
-  - name: is_away_team
-    type: boolean
-    description: "Whether this row represents the away team"
-  - name: pts
+    description: "Matchup string from home team perspective (e.g. 'LAL vs. GSW')"
+  - name: home_pts
     type: integer
-    description: "Points scored by the team in this game"
-  - name: wl
-    type: varchar
-    description: "Win/Loss result for the team ('W' or 'L')"
+    description: "Points scored by the home team"
+  - name: away_pts
+    type: integer
+    description: "Points scored by the away team"
   - name: pts_margin
     type: integer
-    description: "Point differential (team pts - opponent pts)"
+    description: "Point differential from home team perspective (home_pts - away_pts)"
   - name: pts_margin_absolute
     type: integer
     description: "Absolute point differential"
@@ -66,20 +55,20 @@ columns:
   - name: season
     type: varchar
     description: "Season label (e.g. '2025-26')"
-  - name: opponent_team_id
-    type: integer
-    description: "The opposing team's identifier"
-  - name: opponent_pts
-    type: integer
-    description: "Points scored by the opposing team"
-
-custom_checks:
-  - name: unique_game_team
-    description: "Composite PK game_id + team_id must be unique"
-    query: SELECT game_id, team_id FROM core.dim__game GROUP BY game_id, team_id HAVING COUNT(*) > 1
-    count: 0
 @bruin */
--- TODO: Review grain once consumption patterns are clear.
--- Currently keeps game-team grain from prep (one row per team per game).
--- If marts need pure game grain, consider pivoting here or adding a bridge table.
-select * from prep.prep__game
+select
+    game_id,
+    max(game_date) as game_date,
+    max(case when is_home_team then team_id end) as home_team_id,
+    max(case when is_away_team then team_id end) as away_team_id,
+    max(case when is_home_team then matchup end) as matchup,
+    max(case when is_home_team then pts end) as home_pts,
+    max(case when is_away_team then pts end) as away_pts,
+    max(case when is_home_team then pts end) - max(case when is_away_team then pts end) as pts_margin,
+    max(pts_margin_absolute) as pts_margin_absolute,
+    max(is_close_game) as is_close_game,
+    max(is_blowout_game) as is_blowout_game,
+    max(season_id) as season_id,
+    max(season) as season
+from prep.prep__game
+group by game_id

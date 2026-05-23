@@ -21,7 +21,6 @@ columns:
     description: "Unique identifier for the NBA game"
     primary_key: true
     checks:
-      - name: unique
       - name: not_null
   - name: game_date
     type: date
@@ -38,6 +37,9 @@ columns:
   - name: action_sequence
     type: bigint
     description: "Sequence number of the action within the game"
+    primary_key: true
+    checks:
+      - name: not_null
   - name: clock_minutes
     type: integer
     description: "Minutes elapsed within the current period (counting up from 0)"
