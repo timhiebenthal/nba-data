@@ -3,6 +3,8 @@ name: prep.prep__game
 connection: nba_duckdb
 type: duckdb.sql
 
+depends:
+  - clean.clean__games
 
 materialization:
   type: table

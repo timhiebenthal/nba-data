@@ -99,12 +99,16 @@ vars = json.loads(os.environ.get("BRUIN_VARS", "{}"))
 start_date = str(vars.get("start_date", "2025-10-01"))
 end_date = str(vars.get("end_date", "2025-10-07"))
 
-print(f"Fetching play-by-play for games from {start_date} to {end_date}...")
+# Derive season from start_date (NBA season format: YYYY-YY)
+start_year = int(start_date.split("-")[0])
+season = f"{start_year}-{str(start_year + 1)[-2:]}"
+
+print(f"Fetching play-by-play for games from {start_date} to {end_date} (season {season})...")
 
 frames = []
 for season_type in ("Regular Season", "Playoffs"):
     gamefinder = leaguegamefinder.LeagueGameFinder(
-        season_nullable="2025-26",
+        season_nullable=season,
         season_type_nullable=season_type,
         player_or_team_abbreviation="T",
     )

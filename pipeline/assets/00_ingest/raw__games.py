@@ -38,7 +38,7 @@ def _filter_and_write(df: pd.DataFrame, start_date: str, end_date: str) -> None:
         os.makedirs(RAW_DIR, exist_ok=True)
         return
 
-    games["SEASON"] = games["SEASON_ID"].str[:4] + "-" + games["SEASON_ID"].str[4:]
+    games["SEASON"] = games["SEASON_ID"].str[-4:].astype(int).astype(str) + "-" + (games["SEASON_ID"].str[-4:].astype(int) + 1).astype(str).str[-2:]
 
     for month_key in _month_keys(start_date, end_date):
         month_data = games[games["GAME_DATE"].str.startswith(month_key)]
@@ -57,12 +57,16 @@ vars = json.loads(os.environ.get("BRUIN_VARS", "{}"))
 start_date = str(vars.get("start_date", "2025-10-01"))
 end_date = str(vars.get("end_date", "2025-10-07"))
 
-print(f"Fetching games from {start_date} to {end_date}...")
+# Derive season from start_date (NBA season format: YYYY-YY)
+start_year = int(start_date.split("-")[0])
+season = f"{start_year}-{str(start_year + 1)[-2:]}"
+
+print(f"Fetching games from {start_date} to {end_date} (season {season})...")
 
 frames = []
 for season_type in ("Regular Season", "Playoffs"):
     gamefinder = leaguegamefinder.LeagueGameFinder(
-        season_nullable="2025-26",
+        season_nullable=season,
         season_type_nullable=season_type,
         player_or_team_abbreviation="T",
     )

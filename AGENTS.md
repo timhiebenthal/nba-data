@@ -38,14 +38,16 @@ nba-data/
 │       │   ├── clean__box_scores.sql
 │       │   └── clean__play_by_play.sql
 │       ├── 02_prep/        # Layer 2: Joins, flattening, business logic
-│       │   └── prep__game_details.sql
+│       │   ├── prep__game.sql
+│       │   ├── prep__play_by_play.sql
+│       │   ├── prep__player.sql
+│       │   └── prep__team.sql
 │       ├── 03_core/        # Layer 3: SSOT entities (atomic granularity)
-│       │   ├── core__teams.sql
-│       │   ├── core__players.sql
-│       │   ├── core__games.sql
-│       │   └── core__game_stats.sql
+│       │   └── (future)
 │       └── 04_mart/        # Layer 4: Dashboard-ready datasets
-│           └── (future DAC dashboards)
+│           ├── mart__player_season_stats.sql
+│           ├── mart__team_standings.sql
+│           └── mart__game_summaries.sql
 ├── nba.duckdb              # Local DuckDB file (gitignored)
 ├── data/                   # Legacy CSVs from Marimo notebook
 └── pull_data.py            # Legacy Marimo notebook (do not modify)
@@ -61,7 +63,7 @@ nba-data/
 | **clean** | Standardize types, parse JSON, no joins | `clean.clean__{entity}` | `clean.clean__box_scores` |
 | **prep** | Flatten, join, deduplicate, normalize | `prep.prep__{description}` | `prep.prep__game_details` |
 | **core** | SSOT entities at atomic granularity; no daisy-chaining | `core.core__{entity}` | `core.core__game_stats` |
-| **mart** | Dashboard-ready, consumer-shaped datasets | `mart.mart__{use_case}` | (future) |
+| **mart** | Dashboard-ready, consumer-shaped datasets | `mart.mart__{use_case}` | `mart.mart__player_season_stats` |
 
 ## Common Commands
 

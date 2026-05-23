@@ -5,6 +5,10 @@ type: duckdb.sql
 
 depends:
   - clean.clean__play_by_play
+
+materialization:
+  type: table
+  strategy: create+replace
 @bruin */
 select
     game_id,
@@ -25,6 +29,7 @@ select
     is_field_goal,
     score_home,
     score_away,
+    action_sequence,
     action_type,
     action_sub_type,
     shot_value

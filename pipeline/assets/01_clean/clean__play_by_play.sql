@@ -34,10 +34,10 @@ select
     cast(is_field_goal as bool) as is_field_goal,
     score_home,
     score_away,
-    action_type,
-    sub_type as action_sub_type,
-    shot_value
--- location, --tbd what it does,
--- action_id, -- tbd
+    nullif(action_type, '') as action_type,
+    nullif(sub_type, '') as action_sub_type,
+    shot_value,
+    -- location, --tbd what it does,
+    action_id as action_sequence,
 -- action_number -- tbd
 from read_parquet('data/raw/raw__play_by_play/*.parquet')
