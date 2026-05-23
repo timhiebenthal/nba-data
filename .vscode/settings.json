@@ -17,5 +17,6 @@
   "[jinja-sql]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "yassun7010.shandy-sqlfmt"
-  }
+  },
+  "bruin.defaultConnection": "nba_duckdb_readonly"
 }
