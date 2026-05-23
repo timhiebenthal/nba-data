@@ -1,6 +1,6 @@
 /* @bruin
 
-name: dim__game
+name: core.dim__game
 connection: nba_duckdb
 type: duckdb.sql
 

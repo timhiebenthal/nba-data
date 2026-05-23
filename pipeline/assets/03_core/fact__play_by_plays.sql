@@ -1,6 +1,6 @@
 /* @bruin
 
-name: fact__play_by_plays
+name: core.fact__play_by_plays
 connection: nba_duckdb
 type: duckdb.sql
 
