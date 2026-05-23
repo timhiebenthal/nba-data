@@ -14,6 +14,119 @@ depends:
 materialization:
   type: table
   strategy: create+replace
+
+columns:
+  - name: game_id
+    type: varchar
+    description: "Unique identifier for the NBA game"
+  - name: game_date
+    type: date
+    description: "Date the game was played"
+  - name: team_id
+    type: bigint
+    description: "Unique identifier for the team"
+  - name: player_id
+    type: bigint
+    description: "Unique identifier for the player"
+  - name: action_id
+    type: varchar
+    description: "Surrogate key identifying the action type and sub-type"
+  - name: action_sequence
+    type: bigint
+    description: "Sequence number of the action within the game"
+  - name: clock_minutes
+    type: integer
+    description: "Minutes elapsed within the current period (counting up from 0)"
+  - name: clock_seconds_decimal
+    type: double
+    description: "Seconds elapsed within the current period, decimal precision"
+  - name: clock_interval
+    type: interval
+    description: "Interval representing elapsed time within the current period"
+  - name: game_clock_minutes
+    type: integer
+    description: "Total minutes elapsed since start of game (48min + OT)"
+  - name: game_clock_seconds_decimal
+    type: double
+    description: "Total seconds elapsed since start of game, decimal precision"
+  - name: game_clock_interval
+    type: interval
+    description: "Interval representing total elapsed game time"
+  - name: period
+    type: integer
+    description: "Game period (1-4 for regulation, 5+ for overtime)"
+  - name: position_x
+    type: bigint
+    description: "X coordinate of the action location on the court"
+  - name: position_y
+    type: bigint
+    description: "Y coordinate of the action location on the court"
+  - name: shot_distance
+    type: bigint
+    description: "Distance of the shot attempt in feet"
+  - name: shot_result
+    type: varchar
+    description: "Whether the shot was 'Made' or 'Missed'"
+  - name: is_field_goal
+    type: boolean
+    description: "Whether the action was a field goal attempt"
+  - name: score_home
+    type: double
+    description: "Home team score after the action"
+  - name: score_away
+    type: double
+    description: "Away team score after the action"
+  - name: shot_value
+    type: bigint
+    description: "Point value of the shot (2 or 3)"
+  - name: action_type
+    type: varchar
+    description: "High-level category of the play action"
+  - name: action_sub_type
+    type: varchar
+    description: "Refinement of the action type"
+  - name: team_name
+    type: varchar
+    description: "Full name of the team"
+  - name: team_abbreviation
+    type: varchar
+    description: "3-letter abbreviation for the team"
+  - name: team_city
+    type: varchar
+    description: "City where the team is based"
+  - name: team_nickname
+    type: varchar
+    description: "Nickname of the team"
+  - name: team_year_founded
+    type: bigint
+    description: "Year the team was established"
+  - name: matchup
+    type: varchar
+    description: "Matchup string (e.g. 'LAL vs. GSW')"
+  - name: pts_margin
+    type: bigint
+    description: "Point differential at time of action"
+  - name: pts_margin_absolute
+    type: bigint
+    description: "Absolute point differential at time of action"
+  - name: is_close_game
+    type: boolean
+    description: "Whether the game was within 10 points"
+  - name: is_blowout_game
+    type: boolean
+    description: "Whether the game was a 25+ point margin"
+  - name: player_name
+    type: varchar
+    description: "Full name of the player"
+  - name: player_first_name
+    type: varchar
+    description: "First name of the player"
+  - name: player_last_name
+    type: varchar
+    description: "Last name of the player"
+  - name: is_active_player
+    type: boolean
+    description: "Whether the player is currently active"
 @bruin */
 with
     plays as (
@@ -26,6 +139,9 @@ with
             play.clock_minutes,
             play.clock_seconds_decimal,
             play.clock_interval,
+            play.game_clock_minutes,
+            play.game_clock_seconds_decimal,
+            play.game_clock_interval,
             play.period,
             play.position_x,
             play.position_y,
@@ -35,11 +151,14 @@ with
             play.score_home,
             play.score_away,
             play.shot_value,
+            act.action_type,
+            act.action_sub_type,
             team.team_name,
             team.team_abbreviation,
             team.team_city,
             team.team_nickname,
             team.team_year_founded,
+            game.game_date,
             game.matchup,
             game.pts_margin,
             game.pts_margin_absolute,
@@ -49,7 +168,6 @@ with
             player.player_first_name,
             player.player_last_name,
             player.is_active_player
-
         from core.fact__play_by_plays as play
         left join core.dim__action as act using (action_id)
         left join core.dim__team as team using (team_id)

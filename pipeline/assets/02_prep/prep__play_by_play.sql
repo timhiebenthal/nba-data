@@ -10,15 +10,42 @@ materialization:
   type: table
   strategy: create+replace
 @bruin */
+with
+    remaining as (
+        select
+            *,
+            case when period <= 4 then 720 else 300 end as period_length_seconds,
+            clock_minutes * 60 + clock_seconds_decimal as remaining_seconds
+        from clean.clean__play_by_play
+    ),
+
+    elapsed as (
+        select
+            *,
+            period_length_seconds - remaining_seconds as elapsed_in_period_seconds,
+            case when period <= 4 then (period - 1) * 720 else 2880 + (period - 5) * 300 end as prior_periods_seconds
+        from remaining
+    )
+
 select
     game_id,
-    clock_minutes,
-    clock_seconds_decimal,
+    floor(elapsed_in_period_seconds / 60) as clock_minutes,
+    elapsed_in_period_seconds % 60 as clock_seconds_decimal,
     case
         when clock_minutes is not null
-        then (clock_minutes * interval '1 minute') + (clock_seconds_decimal * interval '1 second')
+        then
+            (floor(elapsed_in_period_seconds / 60) * interval '1 minute')
+            + (elapsed_in_period_seconds % 60 * interval '1 second')
     end as clock_interval,
     period,
+    floor((prior_periods_seconds + elapsed_in_period_seconds) / 60) as game_clock_minutes,
+    (prior_periods_seconds + elapsed_in_period_seconds) % 60 as game_clock_seconds_decimal,
+    case
+        when clock_minutes is not null
+        then
+            (floor((prior_periods_seconds + elapsed_in_period_seconds) / 60) * interval '1 minute')
+            + ((prior_periods_seconds + elapsed_in_period_seconds) % 60 * interval '1 second')
+    end as game_clock_interval,
     team_id,
     team_tricode,
     player_id,
@@ -33,4 +60,4 @@ select
     action_type,
     action_sub_type,
     shot_value
-from clean.clean__play_by_play
+from elapsed
