@@ -4,9 +4,9 @@ name: fact__play_by_plays
 connection: nba_duckdb
 type: duckdb.sql
 
-depends_on:
-    - prep.prep__play_by_play
-    - prep.prep__action
+depends:
+  - prep.prep__play_by_play
+  - prep.prep__action
 
 materialization:
   type: table
