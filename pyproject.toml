@@ -8,6 +8,7 @@ dependencies = [
     "duckdb>=1.0.0",
     "pyarrow>=14.0.0",
     "tqdm>=4.65.0",
+    "altair>=6.1.0",
 ]
 
 [dependency-groups]

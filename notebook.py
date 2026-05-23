@@ -8,28 +8,44 @@ app = marimo.App()
 def _():
     import marimo as mo
     import duckdb
-    import polars as pl
+    import pandas as pd
+    import altair as alt
+    import nba_viz
 
+    nba_viz.setup()
     con = duckdb.connect("nba.duckdb", read_only=True)
-    return con, mo, pl
+
+    # Inject Roboto from Google Fonts so Altair labels render correctly
+    mo.Html(
+        '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">'
+    )
+
+    return alt, con, mo, pd
 
 
 @app.cell
-def _(con, mo):
+def _(con, mo, pd):
     # --- Filter controls ---
 
     teams_df = con.execute(
         "SELECT distinct team_abbreviation FROM mart.mart__play_by_play WHERE team_abbreviation IS NOT NULL ORDER BY team_abbreviation"
-    ).pl()
+    ).df()
 
     seasons_df = con.execute(
         "SELECT distinct SEASON FROM mart.mart__player_season_stats ORDER BY SEASON"
-    ).pl()
+    ).df()
 
-    team_options = teams_df["team_abbreviation"].to_list()
-    season_options = seasons_df["SEASON"].to_list()
+    team_options = teams_df["team_abbreviation"].tolist()
+    season_options = seasons_df["SEASON"].tolist()
+
+    date_range = con.execute(
+        "SELECT min(game_date) as min_date, max(game_date) as max_date FROM mart.mart__play_by_play"
+    ).df()
+    min_date = pd.Timestamp(date_range["min_date"].iloc[0]).date()
+    max_date = pd.Timestamp(date_range["max_date"].iloc[0]).date()
 
     team_filter = mo.ui.multiselect(options=team_options, label="Team(s)")
+    date_filter = mo.ui.date_range(start=min_date, stop=max_date, label="Game date range")
     season_filter = mo.ui.multiselect(options=season_options, label="Season(s)")
     player_search = mo.ui.text(placeholder="Search player name...", label="Player")
     shot_result_filter = mo.ui.multiselect(
@@ -46,26 +62,37 @@ def _(con, mo):
 
         Filter the play-by-play data using the controls below.
 
-        {team_filter} {season_filter} {player_search} {shot_result_filter} {period_filter}
+        {team_filter} {date_filter} {season_filter} {player_search} {shot_result_filter} {period_filter}
         """
     )
     return (
-        team_filter,
-        season_filter,
+        date_filter,
+        period_filter,
         player_search,
         shot_result_filter,
-        period_filter,
+        team_filter,
     )
 
 
 @app.cell
-def _(con, team_filter, player_search, shot_result_filter, period_filter, mo, pl):
+def _(
+    con,
+    date_filter,
+    mo,
+    period_filter,
+    player_search,
+    shot_result_filter,
+    team_filter,
+):
     # --- Play-by-Play ---
 
     pbp_clauses = []
     if team_filter.value:
         ph = ", ".join(f"'{v}'" for v in team_filter.value)
         pbp_clauses.append(f"team_abbreviation IN ({ph})")
+    if date_filter.value:
+        start, end = date_filter.value
+        pbp_clauses.append(f"game_date BETWEEN '{start}' AND '{end}'")
     if player_search.value.strip():
         pbp_clauses.append(f"player_name ILIKE '%{player_search.value.strip()}%'")
     if shot_result_filter.value:
@@ -78,149 +105,80 @@ def _(con, team_filter, player_search, shot_result_filter, period_filter, mo, pl
     pbp_where = " AND ".join(pbp_clauses)
     pbp_where_sql = f"WHERE {pbp_where}" if pbp_where else ""
 
-    pbp = con.execute(
+    pbp_filtered = con.execute(
         f"""
-        SELECT
-            GAME_ID,
-            team_abbreviation,
-            player_name,
-            PERIOD as period,
-            clock_minutes,
-            clock_seconds_decimal,
-            action_sequence,
-            SHOT_RESULT,
-            SHOT_DISTANCE,
-            SHOT_VALUE,
-            is_field_goal,
-            SCORE_HOME,
-            SCORE_AWAY,
-            pts_margin,
-            is_close_game,
-            is_blowout_game
+        SELECT *
         FROM mart.mart__play_by_play
         {pbp_where_sql}
-        ORDER BY GAME_ID, PERIOD, clock_minutes DESC, clock_seconds_decimal DESC
+        ORDER BY game_date, PERIOD, action_sequence
         LIMIT 5000
         """
-    ).pl()
+    ).df()
 
-    mo.md(f"### Play-by-Play — **{len(pbp)} rows** (capped at 5,000)")
-    return (pbp,)
-
-
-@app.cell
-def _(pbp, mo):
-    mo.ui.table(pbp, pagination=True, page_size=25)
+    mo.md(f"### Play-by-Play — **{len(pbp_filtered)} rows** (capped at 5,000)")
+    return (pbp_filtered,)
 
 
 @app.cell
-def _(con, team_filter, season_filter, mo, pl):
-    # --- Team Standings ---
+def _(mo, pbp_filtered):
+    mo.ui.table(pbp_filtered, pagination=True, page_size=25)
+    return
 
-    st_clauses = []
-    if team_filter.value:
-        ph4 = ", ".join(f"'{v}'" for v in team_filter.value)
-        st_clauses.append(f"TEAM_ABBREVIATION IN ({ph4})")
-    if season_filter.value:
-        ph5 = ", ".join(f"'{v}'" for v in season_filter.value)
-        st_clauses.append(f"SEASON IN ({ph5})")
 
-    st_where = " AND ".join(st_clauses)
-    st_where_sql = f"WHERE {st_where}" if st_where else ""
+@app.cell
+def _(mo):
+    mo.md("""
+    ### Field Goal % by Team
+    """)
+    return
 
-    standings = con.execute(
+
+@app.cell
+def _(con):
+    minute_shots_df = con.execute(
         f"""
-        SELECT *
-        FROM mart.mart__team_standings
-        {st_where_sql}
-        ORDER BY win_pct DESC
-        """
-    ).pl()
-
-    mo.md("### Team Standings")
-    return (standings,)
-
-
-@app.cell
-def _(standings, mo):
-    mo.ui.table(standings, pagination=True, page_size=30)
-
-
-@app.cell
-def _(con, player_search, season_filter, mo, pl):
-    # --- Player Season Stats ---
-
-    ps_clauses = []
-    if player_search.value.strip():
-        ps_clauses.append(f"PLAYER_NAME ILIKE '%{player_search.value.strip()}%'")
-    if season_filter.value:
-        ph6 = ", ".join(f"'{v}'" for v in season_filter.value)
-        ps_clauses.append(f"SEASON IN ({ph6})")
-
-    ps_where = " AND ".join(ps_clauses)
-    ps_where_sql = f"WHERE {ps_where}" if ps_where else ""
-
-    players = con.execute(
-        f"""
+        with per_game_stats as (
         SELECT
-            PLAYER_NAME,
-            SEASON,
-            games_played,
-            ppg,
-            rpg,
-            apg,
-            spg,
-            bpg,
-            topg,
-            fg_pct,
-            fg3_pct,
-            ft_pct,
-            avg_min,
-            avg_plus_minus
-        FROM mart.mart__player_season_stats
-        {ps_where_sql}
-        ORDER BY ppg DESC
-        LIMIT 200
+            player_name,
+            game_id,
+            total_match_minutes,
+            is_made_field_goal,
+            count(*) as attempts,
+        FROM pbp_filtered
+        where is_field_goal = True
+        GROUP BY all
+        ),
+
+        avg_stats_per_minute as (
+            select
+                player_name,
+                total_match_minutes,
+                is_made_field_goal,
+                avg(attempts) as avg_fg_attempts,
+            from per_game_stats
+            group by all
+            order by 1,2
+        )
+        select * from avg_stats_per_minute
         """
-    ).pl()
-
-    mo.md("### Player Season Stats")
-    return (players,)
+    ).df()
+    return (minute_shots_df,)
 
 
 @app.cell
-def _(players, mo):
-    mo.ui.table(players, pagination=True, page_size=25)
+def _(alt, minute_shots_df):
+    alt.Chart(minute_shots_df).mark_area(opacity=0.7).encode(
+        x='total_match_minutes:Q',
+        y=alt.Y('avg_fg_attempts').stack(None),
+        color='is_made_field_goal',
+        row='player_name'
+    )
+    return
 
 
 @app.cell
-def _(con, season_filter, mo, pl):
-    # --- Game Summaries ---
-
-    gs_clauses = []
-    if season_filter.value:
-        ph7 = ", ".join(f"'{v}'" for v in season_filter.value)
-        gs_clauses.append(f"SEASON IN ({ph7})")
-
-    gs_where = " AND ".join(gs_clauses)
-    gs_where_sql = f"WHERE {gs_where}" if gs_where else ""
-
-    games = con.execute(
-        f"""
-        SELECT *
-        FROM mart.mart__game_summaries
-        {gs_where_sql}
-        ORDER BY game_date DESC
-        """
-    ).pl()
-
-    mo.md("### Game Summaries")
-    return (games,)
-
-
-@app.cell
-def _(games, mo):
-    mo.ui.table(games, pagination=True, page_size=25)
+def _():
+    return
 
 
 if __name__ == "__main__":
