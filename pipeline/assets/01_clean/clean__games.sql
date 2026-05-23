@@ -30,4 +30,3 @@ select
     season_id,
     season
 from read_parquet('data/raw/raw__games/*.parquet')
-where game_id = '0022500090'

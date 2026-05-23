@@ -11,7 +11,8 @@ select
     clock_minutes,
     clock_seconds_decimal,
     case
-        when clock_minutes is not null then make_interval(minutes => clock_minutes, seconds => clock_seconds_decimal)
+        when clock_minutes is not null
+        then (clock_minutes * interval '1 minute') + (clock_seconds_decimal * interval '1 second')
     end as clock_interval,
     period,
     team_id,
