@@ -16,6 +16,8 @@ columns:
     type: varchar
     description: "Unique identifier for the NBA game"
     primary_key: true
+    checks:
+      - name: not_null
   - name: game_date
     type: date
     description: "Date the game was played"
@@ -23,6 +25,8 @@ columns:
     type: integer
     description: "Unique identifier for the team"
     primary_key: true
+    checks:
+      - name: not_null
   - name: team_name
     type: varchar
     description: "Full name of the team"
@@ -68,6 +72,12 @@ columns:
   - name: opponent_pts
     type: integer
     description: "Points scored by the opposing team"
+
+custom_checks:
+  - name: unique_game_team
+    description: "Composite PK game_id + team_id must be unique"
+    query: SELECT game_id, team_id FROM core.dim__game GROUP BY game_id, team_id HAVING COUNT(*) > 1
+    count: 0
 @bruin */
 -- TODO: Review grain once consumption patterns are clear.
 -- Currently keeps game-team grain from prep (one row per team per game).

@@ -45,9 +45,7 @@ nba-data/
 │       ├── 03_core/        # Layer 3: SSOT entities (atomic granularity)
 │       │   └── (future)
 │       └── 04_mart/        # Layer 4: Dashboard-ready datasets
-│           ├── mart__player_season_stats.sql
-│           ├── mart__team_standings.sql
-│           └── mart__game_summaries.sql
+│           ├── mart__play_by_play.sql
 ├── nba.duckdb              # Local DuckDB file (gitignored)
 ├── data/                   # Legacy CSVs from Marimo notebook
 └── pull_data.py            # Legacy Marimo notebook (do not modify)

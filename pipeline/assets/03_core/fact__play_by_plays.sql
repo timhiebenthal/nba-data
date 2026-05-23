@@ -81,6 +81,12 @@ columns:
   - name: is_made_free_throw
     type: boolean
     description: "Whether the action was a made free throw"
+
+custom_checks:
+  - name: unique_play
+    description: "game_id + action_sequence must be unique"
+    query: SELECT game_id, action_sequence FROM core.fact__play_by_plays GROUP BY game_id, action_sequence HAVING COUNT(*) > 1
+    count: 0
 @bruin */
 with
     plays as (

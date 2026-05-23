@@ -19,6 +19,10 @@ columns:
   - name: game_id
     type: varchar
     description: "Unique identifier for the NBA game"
+    primary_key: true
+    checks:
+      - name: unique
+      - name: not_null
   - name: game_date
     type: date
     description: "Date the game was played"
@@ -133,6 +137,12 @@ columns:
   - name: is_active_player
     type: boolean
     description: "Whether the player is currently active"
+
+custom_checks:
+  - name: unique_play
+    description: "Composite PK game_id + action_sequence must be unique (detects fanout)"
+    query: SELECT game_id, action_sequence FROM mart.mart__play_by_play GROUP BY game_id, action_sequence HAVING COUNT(*) > 1
+    count: 0
 @bruin */
 with
     plays as (

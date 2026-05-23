@@ -16,6 +16,9 @@ columns:
     type: integer
     description: "Unique identifier for the team"
     primary_key: true
+    checks:
+      - name: unique
+      - name: not_null
   - name: team_name
     type: varchar
     description: "Full name of the team (e.g. 'Los Angeles Lakers')"

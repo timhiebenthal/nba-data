@@ -21,6 +21,9 @@ load:
 transform:
 	bruin run pipeline --selector "path:assets/01_clean+"
 
+test:
+	bruin run pipeline --only checks
+
 query:
 	duckdb nba.duckdb
 

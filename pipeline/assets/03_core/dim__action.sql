@@ -16,6 +16,9 @@ columns:
     type: varchar
     description: "Surrogate key for the action type + sub-type combination"
     primary_key: true
+    checks:
+      - name: unique
+      - name: not_null
   - name: action_type
     type: varchar
     description: "High-level category of the play action (e.g. 'Jump Ball', 'Layup')"

@@ -16,6 +16,9 @@ columns:
     type: bigint
     description: "Unique identifier for the player"
     primary_key: true
+    checks:
+      - name: unique
+      - name: not_null
   - name: player_name
     type: varchar
     description: "Full name of the player"
