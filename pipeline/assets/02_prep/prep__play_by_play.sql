@@ -38,14 +38,14 @@ select
             + (elapsed_in_period_seconds % 60 * interval '1 second')
     end as clock_interval,
     period,
-    floor((prior_periods_seconds + elapsed_in_period_seconds) / 60) as game_clock_minutes,
-    (prior_periods_seconds + elapsed_in_period_seconds) % 60 as game_clock_seconds_decimal,
+    floor((prior_periods_seconds + elapsed_in_period_seconds) / 60) as total_match_minutes,
+    (prior_periods_seconds + elapsed_in_period_seconds) % 60 as total_match_seconds_decimal,
     case
         when clock_minutes is not null
         then
             (floor((prior_periods_seconds + elapsed_in_period_seconds) / 60) * interval '1 minute')
             + ((prior_periods_seconds + elapsed_in_period_seconds) % 60 * interval '1 second')
-    end as game_clock_interval,
+    end as total_match_time_interval,
     team_id,
     team_tricode,
     player_id,
@@ -59,5 +59,7 @@ select
     action_sequence,
     action_type,
     action_sub_type,
-    shot_value
+    shot_value,
+    shot_result = 'Made' and is_field_goal as is_made_field_goal,
+    action_type = 'Free Throw' and shot_result = 'Made' as is_made_free_throw
 from elapsed

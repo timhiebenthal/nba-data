@@ -39,13 +39,13 @@ columns:
   - name: clock_interval
     type: interval
     description: "Interval representing elapsed time within the current period"
-  - name: game_clock_minutes
+  - name: total_match_minutes
     type: integer
-    description: "Total minutes elapsed since start of game (48min + OT)"
-  - name: game_clock_seconds_decimal
+    description: "Total minutes elapsed since start of game (48min + OT), counting up from 0"
+  - name: total_match_seconds_decimal
     type: double
     description: "Total seconds elapsed since start of game, decimal precision"
-  - name: game_clock_interval
+  - name: total_match_time_interval
     type: interval
     description: "Interval representing total elapsed game time"
   - name: period
@@ -75,6 +75,12 @@ columns:
   - name: shot_value
     type: integer
     description: "Point value of the shot (2 or 3)"
+  - name: is_made_field_goal
+    type: boolean
+    description: "Whether the action was a made field goal (2pt or 3pt)"
+  - name: is_made_free_throw
+    type: boolean
+    description: "Whether the action was a made free throw"
 @bruin */
 with
     plays as (
@@ -87,9 +93,9 @@ with
             play.clock_minutes,
             play.clock_seconds_decimal,
             play.clock_interval,
-            play.game_clock_minutes,
-            play.game_clock_seconds_decimal,
-            play.game_clock_interval,
+            play.total_match_minutes,
+            play.total_match_seconds_decimal,
+            play.total_match_time_interval,
             play.period,
             play.position_x,
             play.position_y,
@@ -98,7 +104,9 @@ with
             play.is_field_goal,
             play.score_home,
             play.score_away,
-            play.shot_value
+            play.shot_value,
+            play.is_made_field_goal,
+            play.is_made_free_throw
         from prep.prep__play_by_play as play
         left join prep.prep__action as act using (action_type, action_sub_type)
     )
