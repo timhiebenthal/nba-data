@@ -91,6 +91,15 @@ columns:
   - name: is_made_free_throw
     type: boolean
     description: "Whether the action was a made free throw"
+  - name: is_score_attempt
+    type: boolean
+    description: "Whether the action was a scoring attempt (field goal or free throw)"
+  - name: is_made_score
+    type: boolean
+    description: "Whether the scoring attempt was successful (made FG or made FT)"
+  - name: shot_type
+    type: varchar
+    description: "Type of scoring attempt: 'Field Goal' or 'Free Throw'"
   - name: action_type
     type: varchar
     description: "High-level category of the play action"
@@ -171,6 +180,11 @@ with
             play.shot_value,
             play.is_made_field_goal,
             play.is_made_free_throw,
+            (play.is_field_goal or act.action_type = 'Free Throw') as is_score_attempt,
+            (play.is_made_field_goal or play.is_made_free_throw) as is_made_score,
+            case
+                when play.is_field_goal then 'Field Goal' when act.action_type = 'Free Throw' then 'Free Throw'
+            end as shot_type,
             act.action_type,
             act.action_sub_type,
             team.team_name,

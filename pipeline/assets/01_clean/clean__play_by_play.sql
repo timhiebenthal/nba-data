@@ -30,7 +30,14 @@ select
     x_legacy as position_x,
     y_legacy as position_y,
     shot_distance,
-    shot_result,
+    case
+        when shot_result != ''
+        then shot_result
+        when action_type = 'Free Throw' and description like 'MISS %'
+        then 'Missed'
+        when action_type = 'Free Throw'
+        then 'Made'
+    end as shot_result,
     cast(is_field_goal as bool) as is_field_goal,
     score_home,
     score_away,

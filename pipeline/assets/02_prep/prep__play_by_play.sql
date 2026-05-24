@@ -59,7 +59,5 @@ select
     action_sequence,
     action_type,
     action_sub_type,
-    shot_value,
-    shot_result = 'Made' and is_field_goal as is_made_field_goal,
-    action_type = 'Free Throw' and shot_result = 'Made' as is_made_free_throw
+    case when action_type = 'Free Throw' then 1 else shot_value end as shot_value
 from elapsed

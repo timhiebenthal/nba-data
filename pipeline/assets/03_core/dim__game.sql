@@ -56,19 +56,54 @@ columns:
     type: varchar
     description: "Season label (e.g. '2025-26')"
 @bruin */
+with
+    home_team as (
+        select game_id, game_date, team_id as home_team_id, pts as home_pts, matchup, season_id, season
+        from prep.prep__game
+        where
+            case
+                when matchup like '%vs.%' and split_part(matchup, ' vs. ', 1) = team_abbreviation
+                then 'home'
+                when matchup like '%vs.%' and split_part(matchup, ' vs. ', 2) = team_abbreviation
+                then 'away'
+                when matchup like '%@%' and split_part(matchup, ' @ ', 1) = team_abbreviation
+                then 'away'
+                when matchup like '%@%' and split_part(matchup, ' @ ', 2) = team_abbreviation
+                then 'home'
+            end
+            = 'home'
+    ),
+
+    away_team as (
+        select game_id, team_id as away_team_id, pts as away_pts
+        from prep.prep__game
+        where
+            case
+                when matchup like '%vs.%' and split_part(matchup, ' vs. ', 1) = team_abbreviation
+                then 'home'
+                when matchup like '%vs.%' and split_part(matchup, ' vs. ', 2) = team_abbreviation
+                then 'away'
+                when matchup like '%@%' and split_part(matchup, ' @ ', 1) = team_abbreviation
+                then 'away'
+                when matchup like '%@%' and split_part(matchup, ' @ ', 2) = team_abbreviation
+                then 'home'
+            end
+            = 'away'
+    )
+
 select
-    game_id,
-    max(game_date) as game_date,
-    max(case when is_home_team then team_id end) as home_team_id,
-    max(case when is_away_team then team_id end) as away_team_id,
-    max(case when is_home_team then matchup end) as matchup,
-    max(case when is_home_team then pts end) as home_pts,
-    max(case when is_away_team then pts end) as away_pts,
-    max(case when is_home_team then pts end) - max(case when is_away_team then pts end) as pts_margin,
-    max(pts_margin_absolute) as pts_margin_absolute,
-    max(is_close_game) as is_close_game,
-    max(is_blowout_game) as is_blowout_game,
-    max(season_id) as season_id,
-    max(season) as season
-from prep.prep__game
-group by game_id
+    h.game_id,
+    h.game_date,
+    h.home_team_id,
+    a.away_team_id,
+    h.matchup,
+    h.home_pts,
+    a.away_pts,
+    h.home_pts - a.away_pts as pts_margin,
+    abs(h.home_pts - a.away_pts) as pts_margin_absolute,
+    abs(h.home_pts - a.away_pts) <= 10 as is_close_game,
+    abs(h.home_pts - a.away_pts) >= 25 as is_blowout_game,
+    h.season_id,
+    h.season
+from home_team as h
+inner join away_team as a using (game_id)

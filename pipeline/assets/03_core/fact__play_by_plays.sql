@@ -74,7 +74,7 @@ columns:
     description: "Away team score after the action"
   - name: shot_value
     type: integer
-    description: "Point value of the shot (2 or 3)"
+    description: "Point value of the shot (1 for FT, 2 or 3 for FG)"
   - name: is_made_field_goal
     type: boolean
     description: "Whether the action was a made field goal (2pt or 3pt)"
@@ -111,8 +111,8 @@ with
             play.score_home,
             play.score_away,
             play.shot_value,
-            play.is_made_field_goal,
-            play.is_made_free_throw
+            play.shot_result = 'Made' and play.is_field_goal as is_made_field_goal,
+            act.action_type = 'Free Throw' and play.shot_result = 'Made' as is_made_free_throw
         from prep.prep__play_by_play as play
         left join prep.prep__action as act using (action_type, action_sub_type)
     )
