@@ -19,7 +19,6 @@ def _():
     mo.Html(
         '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">'
     )
-
     return alt, con, mo, pd
 
 
@@ -44,10 +43,15 @@ def _(con, mo, pd):
     min_date = pd.Timestamp(date_range["min_date"].iloc[0]).date()
     max_date = pd.Timestamp(date_range["max_date"].iloc[0]).date()
 
+    _players_df = con.execute(
+        "SELECT distinct player_name FROM mart.mart__play_by_play WHERE player_name IS NOT NULL ORDER BY player_name"
+    ).df()
+    _player_options = _players_df["player_name"].tolist()
+
     team_filter = mo.ui.multiselect(options=team_options, label="Team(s)")
     date_filter = mo.ui.date_range(start=min_date, stop=max_date, label="Game date range")
     season_filter = mo.ui.multiselect(options=season_options, label="Season(s)")
-    player_search = mo.ui.text(placeholder="Search player name...", label="Player")
+    player_multiselect = mo.ui.multiselect(options=_player_options, label="Player(s)", full_width=True)
     shot_result_filter = mo.ui.multiselect(
         options=["Made", "Missed"], label="Shot result"
     )
@@ -62,16 +66,26 @@ def _(con, mo, pd):
 
         Filter the play-by-play data using the controls below.
 
-        {team_filter} {date_filter} {season_filter} {player_search} {shot_result_filter} {period_filter}
+        {team_filter} {date_filter} {season_filter} {player_multiselect} {shot_result_filter} {period_filter}
         """
     )
     return (
         date_filter,
         period_filter,
-        player_search,
+        player_multiselect,
         shot_result_filter,
         team_filter,
     )
+
+
+@app.cell
+def _(mo, player_multiselect):
+
+    mo.md(f"""#### You have selected the following players:  
+    {', '.join(player_multiselect.value)}
+    """)
+
+    return
 
 
 @app.cell
@@ -80,7 +94,7 @@ def _(
     date_filter,
     mo,
     period_filter,
-    player_search,
+    player_multiselect,
     shot_result_filter,
     team_filter,
 ):
@@ -93,8 +107,9 @@ def _(
     if date_filter.value:
         start, end = date_filter.value
         pbp_clauses.append(f"game_date BETWEEN '{start}' AND '{end}'")
-    if player_search.value.strip():
-        pbp_clauses.append(f"player_name ILIKE '%{player_search.value.strip()}%'")
+    if player_multiselect.value:
+        _ph = ", ".join(f"'{v}'" for v in player_multiselect.value)
+        pbp_clauses.append(f"player_name IN ({_ph})")
     if shot_result_filter.value:
         ph2 = ", ".join(f"'{v}'" for v in shot_result_filter.value)
         pbp_clauses.append(f"SHOT_RESULT IN ({ph2})")
@@ -134,27 +149,86 @@ def _(mo):
 
 
 @app.cell
-def _(con):
+def _():
+    # (cell removed)
+    return
+
+
+@app.cell
+def _(mo):
+    shot_type_toggle = mo.ui.dropdown(
+        options=["Field Goals", "Free Throws", "Both"],
+        value="Field Goals",
+        label="Shot type",
+    )
+
+    close_game_toggle = mo.ui.dropdown(
+        options=["All games", "Close games", "Non-close games"],
+        value="All games",
+        label="Game type",
+    )
+
+    mo.md(f"### Attempts per Game Minute \u2014 {shot_type_toggle}  {close_game_toggle}")
+    return close_game_toggle, shot_type_toggle
+
+
+@app.cell
+def _(
+    close_game_toggle,
+    con,
+    pbp_filtered,
+    player_multiselect,
+    shot_type_toggle,
+):
+    con.register("pbp_filtered_view", pbp_filtered)
+    shot_type = shot_type_toggle.value
+
+    close_game = close_game_toggle.value
+
+    type_filter = ""
+    if shot_type == "Field Goals":
+        type_filter = "AND shot_type = 'Field Goal'"
+    elif shot_type == "Free Throws":
+        type_filter = "AND shot_type = 'Free Throw'"
+
+    close_game_filter = ""
+    if close_game == "Close games":
+        close_game_filter = "AND is_close_game = True"
+    elif close_game == "Non-close games":
+        close_game_filter = "AND is_close_game = False"
+
+    player_filter = ""
+    if player_multiselect.value:
+        _ph = ", ".join(f"'{v}'" for v in player_multiselect.value)
+        player_filter = f"AND player_name IN ({_ph})"
+
     minute_shots_df = con.execute(
         f"""
         with per_game_stats as (
-        SELECT
-            player_name,
-            game_id,
-            total_match_minutes,
-            is_made_field_goal,
-            count(*) as attempts,
-        FROM pbp_filtered
-        where is_field_goal = True
-        GROUP BY all
+            SELECT
+                player_name,
+                game_id,
+                total_match_minutes,
+                total_game_minutes,
+                shot_type,
+                is_made_score as is_made,
+                sum(shot_value) as pts_attempted,
+                count(*) as attempts,
+            FROM pbp_filtered_view
+            WHERE is_score_attempt = True {type_filter} {close_game_filter} {player_filter}
+            GROUP BY all
         ),
 
         avg_stats_per_minute as (
             select
-                player_name,
                 total_match_minutes,
-                is_made_field_goal,
-                avg(attempts) as avg_fg_attempts,
+                player_name,
+                shot_type,
+                is_made,
+                max(total_game_minutes) as total_game_minutes,
+                avg(pts_attempted) as avg_pts_attempted,
+                avg(attempts) as avg_attempts,
+                count(1) as sample_size
             from per_game_stats
             group by all
             order by 1,2
@@ -167,17 +241,55 @@ def _(con):
 
 @app.cell
 def _(alt, minute_shots_df):
-    alt.Chart(minute_shots_df).mark_area(opacity=0.7).encode(
-        x='total_match_minutes:Q',
-        y=alt.Y('avg_fg_attempts').stack(None),
-        color='is_made_field_goal',
-        row='player_name'
+    _max_minute = int(minute_shots_df["total_match_minutes"].max())
+
+    alt.Chart(minute_shots_df).mark_bar(opacity=0.7, size=10).encode(
+        x=alt.X(
+            "total_match_minutes:Q",
+            scale=alt.Scale(domain=[0, _max_minute], nice=False),
+            title="Game Minute"
+        ),
+        y=alt.Y("avg_pts_attempted", axis=alt.Axis(format="d")).stack(True),
+        color="is_made",
+        row=alt.Row("player_name:N", header=alt.Header(labelAngle=0, labelAlign="left", labelPadding=10)),
+        tooltip=["total_match_minutes", "shot_type", "avg_attempts", "sample_size"]
+    ).properties(
+        width=500,
+        height=200,
+        spacing=5
+    ).configure_facet(
+        spacing=5
     )
     return
 
 
 @app.cell
-def _():
+def _(alt, minute_shots_df):
+    max_minute = int(minute_shots_df["total_match_minutes"].max())
+
+    alt.Chart(minute_shots_df).mark_bar(opacity=0.7).encode(
+        x=alt.X(
+            "total_match_minutes:Q",
+            bin=alt.Bin(step=4),
+            scale=alt.Scale(domain=[0, max_minute], nice=False),
+            title="Game Minute (4-min bins)"
+        ),
+        y=alt.Y("mean(avg_pts_attempted)", title="Avg Points Attempted", axis=alt.Axis(format="d")).stack(None),
+        color=alt.Color("is_made:N", title="Made?"),
+        row=alt.Row("player_name:N", header=alt.Header(labelAngle=0, labelAlign="left", labelPadding=10)),
+        tooltip=["total_match_minutes", "shot_type", "avg_attempts", "sample_size"]
+    ).properties(
+        width=700,
+        spacing=5
+    ).configure_facet(
+        spacing=5
+    )
+    return
+
+
+@app.cell
+def _(pbp_filtered):
+    pbp_filtered['GAME_ID'].unique()
     return
 
 
