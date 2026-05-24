@@ -148,6 +148,9 @@ columns:
   - name: is_active_player
     type: boolean
     description: "Whether the player is currently active"
+  - name: total_game_minutes
+    type: integer
+    description: "Total game minutes (48 regulation + 5 per OT period)"
 
 custom_checks:
   - name: unique_play
@@ -201,7 +204,8 @@ with
             player.player_name,
             player.player_first_name,
             player.player_last_name,
-            player.is_active_player
+            player.is_active_player,
+            game.total_minutes as total_game_minutes
         from core.fact__play_by_plays as play
         left join core.dim__action as act using (action_id)
         left join core.dim__team as team using (team_id)

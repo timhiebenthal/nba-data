@@ -6,6 +6,7 @@ type: duckdb.sql
 
 depends:
   - prep.prep__game
+  - prep.prep__play_by_play
 
 materialization:
   type: table
@@ -55,6 +56,9 @@ columns:
   - name: season
     type: varchar
     description: "Season label (e.g. '2025-26')"
+  - name: total_minutes
+    type: integer
+    description: "Total game minutes (48 regulation + 5 per OT period)"
 @bruin */
 with
     home_team as (
@@ -89,6 +93,10 @@ with
                 then 'home'
             end
             = 'away'
+    ),
+
+    game_minutes as (
+        select game_id, 48 + (max(period) - 4) * 5 as total_minutes from prep.prep__play_by_play group by game_id
     )
 
 select
@@ -104,6 +112,8 @@ select
     abs(h.home_pts - a.away_pts) <= 10 as is_close_game,
     abs(h.home_pts - a.away_pts) >= 25 as is_blowout_game,
     h.season_id,
-    h.season
+    h.season,
+    gm.total_minutes
 from home_team as h
 inner join away_team as a using (game_id)
+inner join game_minutes as gm using (game_id)
