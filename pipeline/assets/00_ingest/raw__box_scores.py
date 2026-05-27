@@ -6,12 +6,16 @@ connection: nba_duckdb
 import calendar
 import json
 import os
+import sys
 import time
 from datetime import datetime
 
 import pandas as pd
 from tqdm import tqdm
 from nba_api.stats.endpoints import leaguegamefinder, boxscoretraditionalv3
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from utils import derive_season
 
 RAW_DIR = "data/raw/raw__box_scores"
 EXPECTED_COLUMNS = [
@@ -84,9 +88,7 @@ vars = json.loads(os.environ.get("BRUIN_VARS", "{}"))
 start_date = str(vars.get("start_date", "2025-10-01"))
 end_date = str(vars.get("end_date", "2025-10-07"))
 
-# Derive season from start_date (NBA season format: YYYY-YY)
-start_year = int(start_date.split("-")[0])
-season = f"{start_year}-{str(start_year + 1)[-2:]}"
+season = derive_season(start_date)
 
 print(f"Fetching box scores for games from {start_date} to {end_date} (season {season})...")
 

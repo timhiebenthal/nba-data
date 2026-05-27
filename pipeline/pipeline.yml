@@ -6,7 +6,7 @@ variables:
     default: "2026-05-01"
   end_date:
     type: string
-    default: "2026-05-23"
+    default: "2026-05-27"
 
 default_connections:
   duckdb: nba_duckdb
