@@ -80,11 +80,10 @@ def _(con, mo, pd):
 
 @app.cell
 def _(mo, player_multiselect):
-
-    mo.md(f"""#### You have selected the following players:  
+    mo.md(f"""
+    #### You have selected the following players:  
     {', '.join(player_multiselect.value)}
     """)
-
     return
 
 
@@ -158,7 +157,7 @@ def _():
 def _(mo):
     shot_type_toggle = mo.ui.dropdown(
         options=["Field Goals", "Free Throws", "Both"],
-        value="Field Goals",
+        value="Both",
         label="Shot type",
     )
 
@@ -249,14 +248,15 @@ def _(alt, minute_shots_df):
             scale=alt.Scale(domain=[0, _max_minute], nice=False),
             title="Game Minute"
         ),
-        y=alt.Y("avg_pts_attempted", axis=alt.Axis(format="d")).stack(True),
+        y=alt.Y("avg_pts_attempted", title=None, axis=alt.Axis(format="d")).stack(True),
         color="is_made",
-        row=alt.Row("player_name:N", header=alt.Header(labelAngle=0, labelAlign="left", labelPadding=10)),
+        row=alt.Row("player_name:N", spacing=50, header=alt.Header(labelAngle=-90, labelAlign="left", labelPadding=10)),
         tooltip=["total_match_minutes", "shot_type", "avg_attempts", "sample_size"]
     ).properties(
         width=500,
-        height=200,
-        spacing=5
+        height=150,
+        spacing=5,
+        title='Point attempts over the course of a game'
     ).configure_facet(
         spacing=5
     )
