@@ -14,7 +14,7 @@ Pulls data from the [NBA API](https://github.com/swar/nba_api) (teams, players, 
 | **[DuckDB](https://duckdb.org/)** | Local analytics database, zero setup |
 | **[nba_api](https://github.com/swar/nba_api)** | Python wrapper for stats.nba.com |
 | **[uv](https://docs.astral.sh/uv/)** | Python package management |
-| **[Altair](https://altair-viz.github.io/)** | Viz for Bruin dashboards (DAC) |
+| **[Altair](https://altair-viz.github.io/)** | Viz for Marimo notebook + future DAC |
 
 ## Quick start
 
