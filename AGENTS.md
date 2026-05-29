@@ -46,9 +46,7 @@ nba-data/
 │       │   └── (future)
 │       └── 04_mart/        # Layer 4: Dashboard-ready datasets
 │           ├── mart__play_by_play.sql
-├── nba.duckdb              # Local DuckDB file (gitignored)
-├── data/                   # Legacy CSVs from Marimo notebook
-└── pull_data.py            # Legacy Marimo notebook (do not modify)
+└── nba.duckdb              # Local DuckDB file (gitignored)
 ```
 
 ## Data Model Layers (Clean → Prep → Core → Mart)
@@ -104,7 +102,7 @@ SQL assets use [sqlfmt](https://sqlfmt.com) (`shandy-sqlfmt`). A **pre-commit** 
 - Date parameters: `start_date` and `end_date` as Bruin variables in `pipeline.yml`, overridden via `--var`
 - Incremental loads: games and box scores append by date range; teams/players use replace
 - Rate limits: box score ingestion includes `time.sleep(2.5)` between API calls
-- Marimo notebook (`pull_data.py`) is legacy — do not modify or delete
+
 - `--var` values need quotes for strings: `--var 'start_date="2025-10-21"'`
 
 ## Naming Convention

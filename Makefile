@@ -1,4 +1,4 @@
-.PHONY: init run query ui status clean-db format-sql install-hooks
+.PHONY: init run load transform test query ui status clean-db clean-raw format-sql install-hooks
 
 export PATH := /home/tim_ubuntu/.local/bin:$(PATH)
 
@@ -41,6 +41,3 @@ clean-raw:
 
 format-sql:
 	uv run sqlfmt pipeline/assets
-
-marimo:
-	uv run marimo edit notebook.py
