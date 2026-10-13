@@ -6,14 +6,14 @@ Ad-hoc NBA data ingestion pipeline using Bruin + DuckDB. Pulls data from the NBA
 
 ## Tech Stack
 
-| Layer | Tool |
-|-------|------|
-| Pipeline orchestration | Bruin |
-| Data store | DuckDB (local file) |
-| Ingestion language | Python |
-| Package manager | uv |
-| Source API | nba_api |
-| Dashboards (future) | DAC (Bruin Dashboard-as-Code) |
+| Layer                  | Tool                          |
+| ---------------------- | ----------------------------- |
+| Pipeline orchestration | Bruin                         |
+| Data store             | DuckDB (local file)           |
+| Ingestion language     | Python                        |
+| Package manager        | uv                            |
+| Source API             | nba_api                       |
+| Dashboards             | DAC (Bruin Dashboard-as-Code) |
 
 ## Project Structure
 
@@ -22,6 +22,8 @@ nba-data/
 ├── .bruin.yml              # Bruin project config + connections
 ├── Makefile                # Common commands
 ├── AGENTS.md               # This file
+├── dashboards/             # DAC dashboard YAML files
+│   └── nba_games.yml       # Team filter, games table, points chart
 ├── pipeline/
 │   ├── pipeline.yml        # Pipeline definition + variables
 │   └── assets/
@@ -53,13 +55,13 @@ nba-data/
 
 4-layer transformation architecture. Full guidance available via the `layered-modeling` skill (auto-loads on keywords: clean, prep, core, mart, model, transform, SSOT, grain, daisy-chain).
 
-| Layer | Purpose | Naming | Example |
-|-------|---------|--------|---------|
-| **raw** | Mirror API response as-is (Python → parquet) | `raw.raw_{entity}` | `raw.raw_teams`, `raw.raw_games` |
-| **clean** | Standardize types, parse JSON, no joins | `clean.clean__{entity}` | `clean.clean__box_scores` |
-| **prep** | Flatten, join, deduplicate, normalize | `prep.prep__{description}` | `prep.prep__game_details` |
-| **core** | SSOT entities at atomic granularity; no daisy-chaining | `core.core__{entity}` | `core.core__game_stats` |
-| **mart** | Dashboard-ready, consumer-shaped datasets | `mart.mart__{use_case}` | `mart.mart__player_season_stats` |
+| Layer     | Purpose                                                | Naming                     | Example                          |
+| --------- | ------------------------------------------------------ | -------------------------- | -------------------------------- |
+| **raw**   | Mirror API response as-is (Python → parquet)           | `raw.raw_{entity}`         | `raw.raw_teams`, `raw.raw_games` |
+| **clean** | Standardize types, parse JSON, no joins                | `clean.clean__{entity}`    | `clean.clean__box_scores`        |
+| **prep**  | Flatten, join, deduplicate, normalize                  | `prep.prep__{description}` | `prep.prep__game_details`        |
+| **core**  | SSOT entities at atomic granularity; no daisy-chaining | `core.core__{entity}`      | `core.core__game_stats`          |
+| **mart**  | Dashboard-ready, consumer-shaped datasets              | `mart.mart__{use_case}`    | `mart.mart__player_season_stats` |
 
 ## Common Commands
 
@@ -74,6 +76,8 @@ make clean-db    # Remove DuckDB file (start fresh)
 make clean-raw   # Remove all parquet files in data/raw/
 make format-sql  # Format pipeline SQL with sqlfmt
 make install-hooks # uv sync + pre-commit (sqlfmt on commit)
+make dac-serve   # Start DAC dashboard server (localhost:8321)
+make dac-validate # Validate dashboard YAML files
 ```
 
 ## Testing Changes
@@ -110,13 +114,13 @@ SQL assets use [sqlfmt](https://sqlfmt.com) (`shandy-sqlfmt`). A **pre-commit** 
 File names use `__` (double underscore) to separate the layer prefix from entity — same as before.
 DuckDB table names use dots: one schema per layer.
 
-| Layer | Schema | File Pattern | DuckDB Table |
-|-------|--------|-------------|--------------|
-| raw | `raw` | `raw__{entity}.py` | `raw.raw_{entity}` (parquet files, no DuckDB table) |
-| clean | `clean` | `clean__{entity}.sql` | `clean.clean__{entity}` |
-| prep | `prep` | `prep__{description}.sql` | `prep.prep__{description}` |
-| core | `core` | `core__{entity}.sql` | `core.core__{entity}` |
-| mart | `mart` | `mart__{use_case}.sql` | `mart.mart__{use_case}` |
+| Layer | Schema  | File Pattern              | DuckDB Table                                        |
+| ----- | ------- | ------------------------- | --------------------------------------------------- |
+| raw   | `raw`   | `raw__{entity}.py`        | `raw.raw_{entity}` (parquet files, no DuckDB table) |
+| clean | `clean` | `clean__{entity}.sql`     | `clean.clean__{entity}`                             |
+| prep  | `prep`  | `prep__{description}.sql` | `prep.prep__{description}`                          |
+| core  | `core`  | `core__{entity}.sql`      | `core.core__{entity}`                               |
+| mart  | `mart`  | `mart__{use_case}.sql`    | `mart.mart__{use_case}`                             |
 
 Raw Python assets write month-partitioned parquet files to `data/raw/raw__{entity}/YYYY-MM.parquet`.
 Clean SQL assets read via `read_parquet('data/raw/raw__{entity}/*.parquet')` glob. This supports

@@ -1,4 +1,4 @@
-.PHONY: init run load transform test query ui status clean-db clean-raw format-sql install-hooks marimo
+.PHONY: init run load transform test query ui status clean-db clean-raw format-sql install-hooks marimo dac-serve dac-validate
 
 export PATH := /home/tim_ubuntu/.local/bin:$(PATH)
 
@@ -44,3 +44,9 @@ format-sql:
 
 marimo:
 	uv run marimo edit notebook.py
+
+dac-serve:
+	dac serve
+
+dac-validate:
+	dac validate

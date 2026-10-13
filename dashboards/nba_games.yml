@@ -1,0 +1,71 @@
+name: NBA Games Dashboard
+connection: nba_duckdb_readonly
+
+filters:
+  - name: team
+    type: select
+    default: "All"
+    options:
+      query: SELECT DISTINCT team_name FROM mart.mart__play_by_play ORDER BY team_name
+      connection: nba_duckdb_readonly
+
+  - name: date_range
+    type: date-range
+    default: all_time
+
+rows:
+  - widgets:
+      - name: Games Table
+        type: table
+        sql: |
+          SELECT DISTINCT
+            game_date,
+            MATCHUP,
+            score_home,
+            score_away,
+            pts_margin
+          FROM mart.mart__play_by_play
+          {% if filters.team != 'All' %}
+          WHERE team_name = '{{ filters.team }}'
+          {% endif %}
+          {% if filters.date_range.start and filters.date_range.end %}
+          {% if filters.team != 'All' %}
+            AND
+          {% else %}
+            WHERE
+          {% endif %}
+            game_date >= DATE '{{ filters.date_range.start }}'
+            AND game_date <= DATE '{{ filters.date_range.end }}'
+          {% endif %}
+          ORDER BY game_date DESC
+        col: 12
+
+  - widgets:
+      - name: Points Per Player
+        type: chart
+        chart: bar
+        sql: |
+          SELECT
+            player_name,
+            SUM(CASE WHEN is_made_score THEN shot_value ELSE 0 END) AS points
+          FROM mart.mart__play_by_play
+          {% if filters.team != 'All' %}
+          WHERE team_name = '{{ filters.team }}'
+          {% endif %}
+          {% if filters.date_range.start and filters.date_range.end %}
+          {% if filters.team != 'All' %}
+            AND
+          {% else %}
+            WHERE
+          {% endif %}
+            game_date >= DATE '{{ filters.date_range.start }}'
+            AND game_date <= DATE '{{ filters.date_range.end }}'
+          {% endif %}
+          GROUP BY player_name
+          ORDER BY points DESC
+          LIMIT 20
+        x:
+          field: player_name
+        y:
+          field: points
+        col: 12
