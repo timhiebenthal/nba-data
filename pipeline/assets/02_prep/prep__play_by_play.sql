@@ -54,8 +54,13 @@ select
     shot_distance,
     shot_result,
     is_field_goal,
-    score_home,
-    score_away,
+    -- ffill: propagate last known score to every row in the game
+    last_value(score_home ignore nulls) over (
+        partition by game_id order by period, action_sequence rows between unbounded preceding and current row
+    ) as score_home,
+    last_value(score_away ignore nulls) over (
+        partition by game_id order by period, action_sequence rows between unbounded preceding and current row
+    ) as score_away,
     action_sequence,
     action_type,
     action_sub_type,
