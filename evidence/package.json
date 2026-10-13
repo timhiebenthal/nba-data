@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@evidence-dev/duckdb": "^2.0.1"
+  }
+}
