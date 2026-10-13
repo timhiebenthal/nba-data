@@ -1,0 +1,9 @@
+project:
+  name: "evidence"
+  evidence: "0.10.1"
+
+pages: ./pages
+
+# Random id so Evidence can count deployments of this project, not people. Remove to opt out: https://docs.evidence.studio/cli#telemetry
+telemetry:
+  id: "0f626323-c384-42ab-8eaa-2bd12c75e0bf"
