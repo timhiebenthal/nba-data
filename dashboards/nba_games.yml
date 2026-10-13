@@ -6,27 +6,36 @@ filters:
     type: select
     default: "All"
     options:
-      query: SELECT DISTINCT team_name FROM mart.mart__play_by_play ORDER BY team_name
+      query: SELECT DISTINCT team_name FROM mart.mart__play_by_play WHERE team_name IS NOT NULL ORDER BY team_name
       connection: nba_duckdb_readonly
 
   - name: date_range
     type: date-range
-    default: all_time
+    default: this_year
+    options:
+      presets:
+        - today
+        - last_7_days
+        - last_30_days
+        - last_90_days
+        - this_month
+        - this_year
+        - all_time
 
 rows:
   - widgets:
       - name: Games Table
         type: table
         sql: |
-          SELECT DISTINCT
+          SELECT
             game_date,
             MATCHUP,
-            score_home,
-            score_away,
+            home_pts AS score_home,
+            away_pts AS score_away,
             pts_margin
-          FROM mart.mart__play_by_play
+          FROM core.dim__game
           {% if filters.team != 'All' %}
-          WHERE team_name = '{{ filters.team }}'
+          WHERE MATCHUP LIKE '%{{ filters.team }}%'
           {% endif %}
           {% if filters.date_range.start and filters.date_range.end %}
           {% if filters.team != 'All' %}
@@ -38,6 +47,7 @@ rows:
             AND game_date <= DATE '{{ filters.date_range.end }}'
           {% endif %}
           ORDER BY game_date DESC
+          LIMIT 100
         col: 12
 
   - widgets:
