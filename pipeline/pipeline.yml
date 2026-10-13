@@ -3,10 +3,10 @@ name: nba-ingestion
 variables:
   start_date:
     type: string
-    default: "2026-05-01"
+    default: "2026-06-01"
   end_date:
     type: string
-    default: "2026-06-05"
+    default: "2026-06-10"
 
 default_connections:
   duckdb: nba_duckdb

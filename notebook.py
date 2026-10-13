@@ -40,7 +40,8 @@ def _(con, mo, pd):
     date_range = con.execute(
         "SELECT min(game_date) as min_date, max(game_date) as max_date FROM mart.mart__play_by_play"
     ).df()
-    min_date = pd.Timestamp(date_range["min_date"].iloc[0]).date()
+    #min_date = pd.Timestamp(date_range["min_date"].iloc[0]).date()
+    min_date = pd.Timestamp("2026-06-10 00:00:00").date()
     max_date = pd.Timestamp(date_range["max_date"].iloc[0]).date()
 
     _players_df = con.execute(
@@ -209,6 +210,9 @@ def _(
                 game_id,
                 total_match_minutes,
                 total_game_minutes,
+                score_home,
+                score_away,
+                abs(score_home - score_away) as abs_score_lead,
                 shot_type,
                 is_made_score as is_made,
                 sum(shot_value) as pts_attempted,
@@ -224,6 +228,9 @@ def _(
                 player_name,
                 shot_type,
                 is_made,
+                max(score_home) as score_home,
+                max(score_away) as score_away,
+                max(abs_score_lead) as abs_score_lead,
                 max(total_game_minutes) as total_game_minutes,
                 avg(pts_attempted) as avg_pts_attempted,
                 avg(attempts) as avg_attempts,
@@ -235,14 +242,33 @@ def _(
         select * from avg_stats_per_minute
         """
     ).df()
+
+    minute_shots_df.head()
     return (minute_shots_df,)
+
+
+@app.cell
+def _(minute_shots_df):
+    minute_shots_df.groupby(["total_match_minutes"]).abs_score_lead.mean()
+    return
 
 
 @app.cell
 def _(alt, minute_shots_df):
     _max_minute = int(minute_shots_df["total_match_minutes"].max())
 
-    alt.Chart(minute_shots_df).mark_bar(opacity=0.7, size=10).encode(
+
+    score_gap = alt.Chart(minute_shots_df).mark_line(point=True, size=1).encode(
+        x=alt.X(
+            "total_match_minutes:Q",
+            scale=alt.Scale(domain=[0, _max_minute], nice=False),
+            title="Game Minute",
+        ),
+        y=alt.Y("abs_score_lead", title=None, axis=alt.Axis(format="d")),
+        tooltip=["total_match_minutes", "abs_score_lead"]
+    ).properties(width=500, height=80)
+
+    point_attempts = alt.Chart(minute_shots_df).mark_bar(opacity=0.7, size=10).encode(
         x=alt.X(
             "total_match_minutes:Q",
             scale=alt.Scale(domain=[0, _max_minute], nice=False),
@@ -255,11 +281,11 @@ def _(alt, minute_shots_df):
     ).properties(
         width=500,
         height=150,
-        spacing=5,
         title='Point attempts over the course of a game'
-    ).configure_facet(
-        spacing=5
     )
+
+    # Move configure_facet to the concatenated chart
+    (score_gap & point_attempts).configure_facet(spacing=5)
     return
 
 
