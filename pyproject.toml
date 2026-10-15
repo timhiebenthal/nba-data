@@ -18,6 +18,7 @@ dev = [
     "marimo>=0.23.8",
     "pre-commit>=4.0.0",
     "shandy-sqlfmt>=0.30.0",
+    "trellis-datamodel>=0.23.1",
 ]
 
 [tool.sqlfmt]
