@@ -1,21 +1,17 @@
-# Trellis data model configuration for the NBA Bruin pipeline.
-#
-# Trellis reads and writes Bruin assets directly - there is no manifest step.
-# Column schemas live in the `@bruin` block of each asset.
 framework: bruin
-
-# Pipeline root. Trellis appends /assets/ to find asset files.
-bruin_pipeline_path: "./pipeline"
-
-# The data model covers the entity (core) layer only. Upstream raw/clean/prep
-# assets stay out of the model; the mart is a consumer-shaped deliverable, not
-# an entity.
-bruin_asset_paths: ["03_core"]
-
-# Trellis's own model file - framework-agnostic.
-data_model_file: "data_model.yml"
-
-# Layer bands in the lineage view, in pipeline order.
+modeling_style: dimensional_model
+data_model_file: data_model.yml
+bruin_pipeline_path: ./pipeline
+bruin_asset_paths:
+- 03_core
 lineage:
   enabled: true
-  layers: ["00_ingest", "01_clean", "02_prep", "03_core", "04_mart"]
+  layers:
+  - 00_ingest
+  - 01_clean
+  - 02_prep
+  - 03_core
+  - 04_mart
+exposures:
+  enabled: false
+  default_layout: dashboards-as-rows
