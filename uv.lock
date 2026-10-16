@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -535,14 +535,14 @@ name = "cohere"
 version = "7.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "fastavro" },
-    { name = "httpx" },
-    { name = "pydantic" },
-    { name = "pydantic-core" },
-    { name = "requests" },
-    { name = "tokenizers" },
-    { name = "types-requests" },
-    { name = "typing-extensions" },
+    { name = "fastavro", marker = "sys_platform != 'emscripten'" },
+    { name = "httpx", marker = "sys_platform != 'emscripten'" },
+    { name = "pydantic", marker = "sys_platform != 'emscripten'" },
+    { name = "pydantic-core", marker = "sys_platform != 'emscripten'" },
+    { name = "requests", marker = "sys_platform != 'emscripten'" },
+    { name = "tokenizers", marker = "sys_platform != 'emscripten'" },
+    { name = "types-requests", marker = "sys_platform != 'emscripten'" },
+    { name = "typing-extensions", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e6/90/0e4f7591dce5743690f4b7656e7aeadd713691ebaae77a08542481e325aa/cohere-7.0.0.tar.gz", hash = "sha256:88ca34c91e634a64227f3eaa599d1af364b9d7bbc9336af93473fdced355617d", size = 208566, upload-time = "2026-05-22T18:48:47.982Z" }
 wheels = [
@@ -2074,7 +2074,7 @@ dev = [
     { name = "marimo", specifier = ">=0.23.8" },
     { name = "pre-commit", specifier = ">=4.0.0" },
     { name = "shandy-sqlfmt", specifier = ">=0.30.0" },
-    { name = "trellis-datamodel", specifier = "==0.24.0" },
+    { name = "trellis-datamodel", specifier = "==0.24.2" },
 ]
 
 [[package]]
@@ -3515,8 +3515,8 @@ name = "secretstorage"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cryptography" },
-    { name = "jeepney" },
+    { name = "cryptography", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "jeepney", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1c/03/e834bcd866f2f8a49a85eaff47340affa3bfa391ee9912a952a1faa68c7b/secretstorage-3.5.0.tar.gz", hash = "sha256:f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be", size = 19884, upload-time = "2025-11-23T19:02:53.191Z" }
 wheels = [
@@ -3678,7 +3678,7 @@ name = "tokenizers"
 version = "0.23.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "huggingface-hub" },
+    { name = "huggingface-hub", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/c1/60/21f715d9faba5f5407ff759472ade058ec4a507ad62bcea47cb847239a73/tokenizers-0.23.1.tar.gz", hash = "sha256:1feeeadf865a7915adc25445dea30e9933e593c31bb96c277cee36de227c8bfa", size = 365748, upload-time = "2026-04-27T14:43:25.606Z" }
 wheels = [
@@ -3723,7 +3723,7 @@ wheels = [
 
 [[package]]
 name = "trellis-datamodel"
-version = "0.24.0"
+version = "0.24.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fastapi" },
@@ -3734,9 +3734,9 @@ dependencies = [
     { name = "typer" },
     { name = "uvicorn" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/68/45/b5be2854dac4804c566ce20a8e1be26eae44847406fd52ad245cc9d0f642/trellis_datamodel-0.24.0.tar.gz", hash = "sha256:a58492cf8858a2fe1519ca61c87887dd87a33eee211ff0b875e807e408e1f4c1", size = 1084821, upload-time = "2026-10-15T16:07:50.347Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6f/dc/4c93d41137dd78475945efc08a5aeb7e93334e29039ce0ebeaf8ee7d9aeb/trellis_datamodel-0.24.2.tar.gz", hash = "sha256:dd548fa803074d4451cb9507b6dbaa22b8158ba752ba3975a506037b0954c4b3", size = 1087640, upload-time = "2026-10-16T08:24:22.776Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/75/827730b8fc657b2ace230c9fa441f5e4648d7672e0d487cfbf9fb8bec2cc/trellis_datamodel-0.24.0-py3-none-any.whl", hash = "sha256:1798313a8f880569cee778c09a2cd0232216f2a1eb0091d2c1246d4ca5a30bc1", size = 1152874, upload-time = "2026-10-15T16:07:48.526Z" },
+    { url = "https://files.pythonhosted.org/packages/90/a9/98d33c91cfc617bfb692e7af591327e69e6cef94a3985de948bcda04dc06/trellis_datamodel-0.24.2-py3-none-any.whl", hash = "sha256:849c5d6c17e4eb32cbd1e7e837c280fe1684f03cc5ac0ba9b85a5ea54c07771f", size = 1156121, upload-time = "2026-10-16T08:24:20.787Z" },
 ]
 
 [[package]]
@@ -3768,7 +3768,7 @@ name = "types-requests"
 version = "2.33.0.20260518"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "urllib3" },
+    { name = "urllib3", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e0/01/c5a19253fe1ac159159ddf9a3a07cec8bb5e486ec4d9002ad2821da0e5d2/types_requests-2.33.0.20260518.tar.gz", hash = "sha256:df7bd3bfe0ca8402dfb841e7d9be714bb5578203283d66d7dc4ef69343449a5e", size = 24752, upload-time = "2026-05-18T06:07:37.966Z" }
 wheels = [
