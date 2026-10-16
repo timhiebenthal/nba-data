@@ -2,39 +2,39 @@ version: 0.1
 entities:
   dim__game:
     position:
+      x: 204
+      y: 491.02207733551336
+    width: 280
+    panel_height: 200
+    collapsed: true
+  play_by_plays:
+    position:
+      x: 586.6309604591802
+      y: 402.5375044063326
+    width: 280
+    panel_height: 303
+    collapsed: true
+  player:
+    position:
       x: 40
+      y: 141.02207733551333
+    width: 280
+    panel_height: 200
+    collapsed: true
+  team:
+    position:
+      x: 1104
+      y: 551.0220773355134
+    width: 280
+    panel_height: 200
+    collapsed: true
+  action:
+    position:
+      x: 1029.6790845111034
       y: 100
     width: 280
     panel_height: 200
-    collapsed: false
-  play_by_plays:
-    position:
-      x: 446
-      y: 72
-    width: 280
-    panel_height: 303
-    collapsed: false
-  player:
-    position:
-      x: -124
-      y: -250
-    width: 280
-    panel_height: 200
-    collapsed: false
-  team:
-    position:
-      x: 940
-      y: 160
-    width: 280
-    panel_height: 200
-    collapsed: false
-  action:
-    position:
-      x: 692.4732620320856
-      y: -68.3288770053476
-    width: 280
-    panel_height: 200
-    collapsed: false
+    collapsed: true
 relationships:
   play_by_plays-dim__game-0:
     label_dx: 0

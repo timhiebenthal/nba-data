@@ -1,5 +1,6 @@
 /* @bruin
 name: core.dim__player
+description: Player dimension.
 connection: nba_duckdb
 type: duckdb.sql
 
@@ -30,6 +31,5 @@ columns:
   - name: is_active_player
     type: boolean
     description: "Whether the player is currently active"
-description: Player dimension.
 @bruin */
 select player_id, player_name, player_first_name, player_last_name, is_active_player from prep.prep__player

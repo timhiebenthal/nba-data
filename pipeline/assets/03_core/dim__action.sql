@@ -1,5 +1,6 @@
 /* @bruin
 name: core.dim__action
+description: Action dimension.
 connection: nba_duckdb
 type: duckdb.sql
 
@@ -24,6 +25,5 @@ columns:
   - name: action_sub_type
     type: varchar
     description: "Refinement of the action type (e.g. 'Driving', 'Pullup')"
-description: Action dimension.
 @bruin */
 select action_id, action_type, action_sub_type from prep.prep__action

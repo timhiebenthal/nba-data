@@ -1,5 +1,6 @@
 /* @bruin
 name: core.fact__play_by_plays
+description: One row per play-by-play event.
 connection: nba_duckdb
 type: duckdb.sql
 
@@ -97,7 +98,6 @@ custom_checks:
     description: "game_id + action_sequence must be unique"
     query: SELECT game_id, action_sequence FROM core.fact__play_by_plays GROUP BY game_id, action_sequence HAVING COUNT(*) > 1
     count: 0
-description: One row per play-by-play event.
 @bruin */
 with
     plays as (
