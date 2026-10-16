@@ -2074,7 +2074,7 @@ dev = [
     { name = "marimo", specifier = ">=0.23.8" },
     { name = "pre-commit", specifier = ">=4.0.0" },
     { name = "shandy-sqlfmt", specifier = ">=0.30.0" },
-    { name = "trellis-datamodel", specifier = "==0.24.2" },
+    { name = "trellis-datamodel", specifier = "==0.24.3" },
 ]
 
 [[package]]
@@ -3723,7 +3723,7 @@ wheels = [
 
 [[package]]
 name = "trellis-datamodel"
-version = "0.24.2"
+version = "0.24.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fastapi" },
@@ -3734,9 +3734,9 @@ dependencies = [
     { name = "typer" },
     { name = "uvicorn" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6f/dc/4c93d41137dd78475945efc08a5aeb7e93334e29039ce0ebeaf8ee7d9aeb/trellis_datamodel-0.24.2.tar.gz", hash = "sha256:dd548fa803074d4451cb9507b6dbaa22b8158ba752ba3975a506037b0954c4b3", size = 1087640, upload-time = "2026-10-16T08:24:22.776Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/b2/9c21f83e86cdbe398d578422808e2a5ee6fb33539403cf10c006ef08a9fc/trellis_datamodel-0.24.3.tar.gz", hash = "sha256:7f23c1a55ce3dd53493d5eafbf8c7b2770c8565a0abbc5b14a6848cb1be1575a", size = 1092228, upload-time = "2026-10-16T12:23:29.778Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/90/a9/98d33c91cfc617bfb692e7af591327e69e6cef94a3985de948bcda04dc06/trellis_datamodel-0.24.2-py3-none-any.whl", hash = "sha256:849c5d6c17e4eb32cbd1e7e837c280fe1684f03cc5ac0ba9b85a5ea54c07771f", size = 1156121, upload-time = "2026-10-16T08:24:20.787Z" },
+    { url = "https://files.pythonhosted.org/packages/3d/b8/6b46485ec2a76201c1891f3dbb0f6fefda7156e50fbb344ac0228e55898f/trellis_datamodel-0.24.3-py3-none-any.whl", hash = "sha256:ef9afe01f54644b78e6e40d56a2f2cd52bc51faf9315571ee09665e98559e227", size = 1160604, upload-time = "2026-10-16T12:23:27.703Z" },
 ]
 
 [[package]]
