@@ -1,5 +1,4 @@
 /* @bruin
-
 name: core.dim__team
 connection: nba_duckdb
 type: duckdb.sql
@@ -34,5 +33,6 @@ columns:
   - name: team_year_founded
     type: bigint
     description: "Year the team was established"
+description: Team dimension.
 @bruin */
 select team_id, team_name, team_abbreviation, team_city, team_nickname, team_year_founded from prep.prep__team

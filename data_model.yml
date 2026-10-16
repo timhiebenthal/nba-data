@@ -76,7 +76,7 @@ entities:
         physical_datatype: integer
         description: Total game minutes (48 regulation + 5 per OT period)
     entity_type: dimension
-  - id: fact__play_by_plays
+  - id: play_by_plays
     label: Play By Plays
     description: One row per play-by-play event.
     model_ref: core.fact__play_by_plays
@@ -192,7 +192,7 @@ entities:
         physical_datatype: boolean
         description: Whether the action was a made free throw
     entity_type: fact
-  - id: dim__player
+  - id: player
     label: Player
     description: Player dimension.
     model_ref: core.dim__player
@@ -223,7 +223,7 @@ entities:
         physical_datatype: boolean
         description: Whether the player is currently active
     entity_type: dimension
-  - id: dim__team
+  - id: team
     label: Team
     description: Team dimension.
     model_ref: core.dim__team
@@ -259,7 +259,7 @@ entities:
         physical_datatype: bigint
         description: Year the team was established
     entity_type: dimension
-  - id: dim__action
+  - id: action
     label: Action
     description: Action dimension.
     model_ref: core.dim__action
@@ -281,32 +281,26 @@ entities:
         description: Refinement of the action type (e.g. 'Driving', 'Pullup')
     entity_type: dimension
 relationships:
-  - source: fact__play_by_plays
+  - source: play_by_plays
     target: dim__game
     label: ''
     type: many_to_one
     source_field: game_id
     target_field: game_id
-  - source: dim__player
-    target: fact__play_by_plays
-    label: ''
-    type: one_to_many
-    source_field: player_name
-    target_field: team_id
-  - source: dim__player
-    target: fact__play_by_plays
-    label: ''
-    type: one_to_many
-    source_field: player_id
-    target_field: player_id
-  - source: dim__team
-    target: fact__play_by_plays
+  - source: team
+    target: play_by_plays
     label: ''
     type: one_to_many
     source_field: team_id
     target_field: team_id
-  - source: dim__action
-    target: fact__play_by_plays
+  - source: player
+    target: play_by_plays
+    label: ''
+    type: one_to_many
+    source_field: player_id
+    target_field: player_id
+  - source: action
+    target: play_by_plays
     label: ''
     type: one_to_many
     source_field: action_id

@@ -2,53 +2,50 @@ version: 0.1
 entities:
   dim__game:
     position:
-      x: 59
+      x: 40
       y: 100
     width: 280
     panel_height: 200
-    collapsed: true
-  fact__play_by_plays:
+    collapsed: false
+  play_by_plays:
     position:
-      x: 406.5836161048488
-      y: 337.8177696995849
+      x: 446
+      y: 72
+    width: 280
+    panel_height: 303
+    collapsed: false
+  player:
+    position:
+      x: -124
+      y: -250
     width: 280
     panel_height: 200
-    collapsed: true
-  dim__player:
+    collapsed: false
+  team:
     position:
-      x: 854
-      y: 279
+      x: 940
+      y: 160
     width: 280
     panel_height: 200
-    collapsed: true
-  dim__team:
+    collapsed: false
+  action:
     position:
-      x: 40
-      y: 591
+      x: 692.4732620320856
+      y: -68.3288770053476
     width: 280
     panel_height: 200
-    collapsed: true
-  dim__action:
-    position:
-      x: 491.1114881397983
-      y: 101.04136608192653
-    width: 280
-    panel_height: 200
-    collapsed: true
+    collapsed: false
 relationships:
-  fact__play_by_plays-dim__game-0:
+  play_by_plays-dim__game-0:
     label_dx: 0
     label_dy: 0
-  dim__player-fact__play_by_plays-1:
+  team-play_by_plays-1:
     label_dx: 0
     label_dy: 0
-  dim__player-fact__play_by_plays-2:
+  player-play_by_plays-2:
     label_dx: 0
     label_dy: 0
-  dim__team-fact__play_by_plays-3:
-    label_dx: 0
-    label_dy: 0
-  dim__action-fact__play_by_plays-4:
+  action-play_by_plays-3:
     label_dx: 0
     label_dy: 0
 source_colors: {}

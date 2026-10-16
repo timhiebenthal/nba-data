@@ -1,5 +1,4 @@
 /* @bruin
-
 name: core.dim__game
 connection: nba_duckdb
 type: duckdb.sql
@@ -59,6 +58,7 @@ columns:
   - name: total_minutes
     type: integer
     description: "Total game minutes (48 regulation + 5 per OT period)"
+description: One row per NBA game.
 @bruin */
 with
     home_team as (
