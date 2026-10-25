@@ -1,6 +1,6 @@
 /* @bruin
-
 name: core.fact__play_by_plays
+description: One row per play-by-play event.
 connection: nba_duckdb
 type: duckdb.sql
 
@@ -15,73 +15,84 @@ materialization:
 columns:
   - name: game_id
     type: varchar
-    description: "Unique identifier for the NBA game"
+    description: Unique identifier for the NBA game
     primary_key: true
+    foreign_key:
+      table: core.dim__game
+      column: game_id
   - name: team_id
     type: integer
-    description: "Unique identifier for the team"
+    description: Unique identifier for the team
     primary_key: true
+    foreign_key:
+      table: core.dim__team
+      column: team_id
   - name: player_id
     type: bigint
-    description: "Unique identifier for the player"
+    description: Unique identifier for the player
+    foreign_key:
+      table: core.dim__player
+      column: player_id
   - name: action_id
     type: varchar
-    description: "Surrogate key identifying the action type and sub-type"
+    description: Surrogate key identifying the action type and sub-type
+    foreign_key:
+      table: core.dim__action
+      column: action_id
   - name: action_sequence
     type: bigint
-    description: "Sequence number of the action within the game"
+    description: Sequence number of the action within the game
   - name: clock_minutes
     type: integer
-    description: "Minutes elapsed within the current period (counting up from 0)"
+    description: Minutes elapsed within the current period (counting up from 0)
   - name: clock_seconds_decimal
     type: double
-    description: "Seconds elapsed within the current period, decimal precision"
+    description: Seconds elapsed within the current period, decimal precision
   - name: clock_interval
     type: interval
-    description: "Interval representing elapsed time within the current period"
+    description: Interval representing elapsed time within the current period
   - name: total_match_minutes
     type: integer
-    description: "Total minutes elapsed since start of game (48min + OT), counting up from 0"
+    description: Total minutes elapsed since start of game (48min + OT), counting up from 0
   - name: total_match_seconds_decimal
     type: double
-    description: "Total seconds elapsed since start of game, decimal precision"
+    description: Total seconds elapsed since start of game, decimal precision
   - name: total_match_time_interval
     type: interval
-    description: "Interval representing total elapsed game time"
+    description: Interval representing total elapsed game time
   - name: period
     type: integer
-    description: "Game period (1-4 for regulation, 5+ for overtime)"
+    description: Game period (1-4 for regulation, 5+ for overtime)
   - name: position_x
     type: integer
-    description: "X coordinate of the action location on the court"
+    description: X coordinate of the action location on the court
   - name: position_y
     type: integer
-    description: "Y coordinate of the action location on the court"
+    description: Y coordinate of the action location on the court
   - name: shot_distance
     type: integer
-    description: "Distance of the shot attempt in feet"
+    description: Distance of the shot attempt in feet
   - name: shot_result
     type: varchar
-    description: "Whether the shot was 'Made' or 'Missed'"
+    description: Whether the shot was 'Made' or 'Missed'
   - name: is_field_goal
     type: boolean
-    description: "Whether the action was a field goal attempt"
+    description: Whether the action was a field goal attempt
   - name: score_home
     type: double
-    description: "Home team score after the action"
+    description: Home team score after the action
   - name: score_away
     type: double
-    description: "Away team score after the action"
+    description: Away team score after the action
   - name: shot_value
     type: integer
-    description: "Point value of the shot (1 for FT, 2 or 3 for FG)"
+    description: Point value of the shot (1 for FT, 2 or 3 for FG)
   - name: is_made_field_goal
     type: boolean
-    description: "Whether the action was a made field goal (2pt or 3pt)"
+    description: Whether the action was a made field goal (2pt or 3pt)
   - name: is_made_free_throw
     type: boolean
-    description: "Whether the action was a made free throw"
-
+    description: Whether the action was a made free throw
 custom_checks:
   - name: unique_play
     description: "game_id + action_sequence must be unique"

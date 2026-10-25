@@ -1,6 +1,6 @@
 /* @bruin
-
 name: core.dim__action
+description: Action dimension.
 connection: nba_duckdb
 type: duckdb.sql
 

@@ -1,0 +1,17 @@
+framework: bruin
+modeling_style: dimensional_model
+data_model_file: data_model.yml
+bruin_pipeline_path: ./pipeline
+bruin_asset_paths:
+- 03_core
+lineage:
+  enabled: true
+  layers:
+  - 00_ingest
+  - 01_clean
+  - 02_prep
+  - 03_core
+  - 04_mart
+exposures:
+  enabled: false
+  default_layout: dashboards-as-rows

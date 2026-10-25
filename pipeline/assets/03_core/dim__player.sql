@@ -1,6 +1,6 @@
 /* @bruin
-
 name: core.dim__player
+description: Player dimension.
 connection: nba_duckdb
 type: duckdb.sql
 

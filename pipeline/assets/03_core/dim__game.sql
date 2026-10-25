@@ -1,6 +1,6 @@
 /* @bruin
-
 name: core.dim__game
+description: One row per NBA game.
 connection: nba_duckdb
 type: duckdb.sql
 

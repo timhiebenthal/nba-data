@@ -1,0 +1,307 @@
+version: 0.1
+entities:
+  - id: dim__game
+    label: Game
+    description: One row per NBA game.
+    model_ref: core.dim__game
+    drafted_fields:
+      - name: game_id
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Unique identifier for the NBA game
+      - name: game_date
+        datatype: date
+        source: dbt
+        physical_datatype: date
+        description: Date the game was played
+      - name: home_team_id
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Team ID of the home team
+      - name: away_team_id
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Team ID of the away team
+      - name: matchup
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Matchup string from home team perspective (e.g. 'LAL vs. GSW')
+      - name: home_pts
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Points scored by the home team
+      - name: away_pts
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Points scored by the away team
+      - name: pts_margin
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Point differential from home team perspective (home_pts - away_pts)
+      - name: pts_margin_absolute
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Absolute point differential
+      - name: is_close_game
+        datatype: bool
+        source: dbt
+        physical_datatype: boolean
+        description: Whether the game was within 10 points
+      - name: is_blowout_game
+        datatype: bool
+        source: dbt
+        physical_datatype: boolean
+        description: Whether the game was a 25+ point margin
+      - name: season_id
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: NBA season identifier
+      - name: season
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Season label (e.g. '2025-26')
+      - name: total_minutes
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Total game minutes (48 regulation + 5 per OT period)
+    entity_type: dimension
+  - id: play_by_plays
+    label: Play By Plays
+    description: One row per play-by-play event.
+    model_ref: core.fact__play_by_plays
+    drafted_fields:
+      - name: game_id
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Unique identifier for the NBA game
+      - name: team_id
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Unique identifier for the team
+      - name: player_id
+        datatype: int
+        source: dbt
+        physical_datatype: bigint
+        description: Unique identifier for the player
+      - name: action_id
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Surrogate key identifying the action type and sub-type
+      - name: action_sequence
+        datatype: int
+        source: dbt
+        physical_datatype: bigint
+        description: Sequence number of the action within the game
+      - name: clock_minutes
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Minutes elapsed within the current period (counting up from 0)
+      - name: clock_seconds_decimal
+        datatype: float
+        source: dbt
+        physical_datatype: double
+        description: Seconds elapsed within the current period, decimal precision
+      - name: clock_interval
+        datatype: int
+        source: dbt
+        physical_datatype: interval
+        description: Interval representing elapsed time within the current period
+      - name: total_match_minutes
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Total minutes elapsed since start of game (48min + OT), counting up from 0
+      - name: total_match_seconds_decimal
+        datatype: float
+        source: dbt
+        physical_datatype: double
+        description: Total seconds elapsed since start of game, decimal precision
+      - name: total_match_time_interval
+        datatype: int
+        source: dbt
+        physical_datatype: interval
+        description: Interval representing total elapsed game time
+      - name: period
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Game period (1-4 for regulation, 5+ for overtime)
+      - name: position_x
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: X coordinate of the action location on the court
+      - name: position_y
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Y coordinate of the action location on the court
+      - name: shot_distance
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Distance of the shot attempt in feet
+      - name: shot_result
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Whether the shot was 'Made' or 'Missed'
+      - name: is_field_goal
+        datatype: bool
+        source: dbt
+        physical_datatype: boolean
+        description: Whether the action was a field goal attempt
+      - name: score_home
+        datatype: float
+        source: dbt
+        physical_datatype: double
+        description: Home team score after the action
+      - name: score_away
+        datatype: float
+        source: dbt
+        physical_datatype: double
+        description: Away team score after the action
+      - name: shot_value
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Point value of the shot (1 for FT, 2 or 3 for FG)
+      - name: is_made_field_goal
+        datatype: bool
+        source: dbt
+        physical_datatype: boolean
+        description: Whether the action was a made field goal (2pt or 3pt)
+      - name: is_made_free_throw
+        datatype: bool
+        source: dbt
+        physical_datatype: boolean
+        description: Whether the action was a made free throw
+    entity_type: fact
+  - id: player
+    label: Player
+    description: Player dimension.
+    model_ref: core.dim__player
+    drafted_fields:
+      - name: player_id
+        datatype: int
+        source: dbt
+        physical_datatype: bigint
+        description: Unique identifier for the player
+      - name: player_name
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Full name of the player
+      - name: player_first_name
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: First name of the player
+      - name: player_last_name
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Last name of the player
+      - name: is_active_player
+        datatype: bool
+        source: dbt
+        physical_datatype: boolean
+        description: Whether the player is currently active
+    entity_type: dimension
+  - id: team
+    label: Team
+    description: Team dimension.
+    model_ref: core.dim__team
+    drafted_fields:
+      - name: team_id
+        datatype: int
+        source: dbt
+        physical_datatype: integer
+        description: Unique identifier for the team
+      - name: team_name
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Full name of the team (e.g. 'Los Angeles Lakers')
+      - name: team_abbreviation
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: 3-letter abbreviation for the team (e.g. 'LAL')
+      - name: team_city
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: City where the team is based (e.g. 'Los Angeles')
+      - name: team_nickname
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Nickname of the team (e.g. 'Lakers')
+      - name: team_year_founded
+        datatype: int
+        source: dbt
+        physical_datatype: bigint
+        description: Year the team was established
+    entity_type: dimension
+  - id: action
+    label: Action
+    description: Action dimension.
+    model_ref: core.dim__action
+    drafted_fields:
+      - name: action_id
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Surrogate key for the action type + sub-type combination
+      - name: action_type
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: High-level category of the play action (e.g. 'Jump Ball', 'Layup')
+      - name: action_sub_type
+        datatype: text
+        source: dbt
+        physical_datatype: varchar
+        description: Refinement of the action type (e.g. 'Driving', 'Pullup')
+    entity_type: dimension
+relationships:
+  - source: play_by_plays
+    target: dim__game
+    label: ''
+    type: many_to_one
+    source_field: game_id
+    target_field: game_id
+  - source: team
+    target: play_by_plays
+    label: ''
+    type: one_to_many
+    source_field: team_id
+    target_field: team_id
+  - source: player
+    target: play_by_plays
+    label: ''
+    type: one_to_many
+    source_field: player_id
+    target_field: player_id
+  - source: action
+    target: play_by_plays
+    label: ''
+    type: one_to_many
+    source_field: action_id
+    target_field: action_id
