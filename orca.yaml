@@ -1,0 +1,19 @@
+# orca.yaml - read by the Orca ADE when it creates a git worktree.
+# Docs: https://www.onorca.dev/docs/model/orca-yaml
+#
+# `uv sync` is the whole setup step. `bruin` is a globally installed uv tool
+# (~/.local/bin/bruin), not a project dependency, so it is not installed here.
+#
+# `pre-commit install` is deliberately absent: hooks live in the shared
+# $GIT_COMMON_DIR/hooks directory, so installing them in the primary checkout
+# already covers every worktree.
+#
+# No `worktree.sharedDirectories`: .venv holds an editable install whose finder
+# points at the primary checkout, so a linked venv would make worktree runs
+# import main's source.
+#
+# data/raw and nba.duckdb arrive via .worktreeinclude, so a fresh worktree can
+# run `make run|transform|test` without rebuilding from scratch.
+setupAgentStartupPolicy: wait-for-setup
+scripts:
+  setup: uv sync

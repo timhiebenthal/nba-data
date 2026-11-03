@@ -1,0 +1,21 @@
+# .worktreeinclude - gitignored paths Orca copies into each new local worktree.
+# Docs: https://www.onorca.dev/docs/model/orca-yaml
+#
+# One literal path per line. No globs, no negation. Entries must exist and be
+# gitignored in the primary checkout; missing entries are skipped silently.
+# Copies are private per worktree - changing a value in the primary checkout
+# does not propagate to existing worktrees.
+#
+# A fresh worktree has no data otherwise: data/ contains only the gitignored
+# raw/ directory, and nba.duckdb is gitignored too. There is no network fetch in
+# the pipeline, so raw/ is the only source of truth.
+#
+# .bruin.yml holds the duckdb connection paths (relative, no secrets) and is
+# required for bruin to resolve connections at all.
+#
+# nba.duckdb is 420 MB. Copying it costs seconds on ext4 and skips a full
+# `make run` rebuild; drop it from this list if worktree disk usage matters more.
+
+.bruin.yml
+nba.duckdb
+data/raw
