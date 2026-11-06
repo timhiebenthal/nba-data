@@ -11,3 +11,5 @@ logs/runs
 logs/*.log
 *.py[cod]
 logs/queries
+# Rill local runtime state
+rill/tmp/
