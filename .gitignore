@@ -1,6 +1,7 @@
 nba.duckdb
 data/raw/
 __pycache__/
+__marimo__/session/
 .venv/
 
 .bruin.yml
